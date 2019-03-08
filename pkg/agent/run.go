@@ -17,6 +17,7 @@ import (
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/tunnel"
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/cmds"
 	"github.com/Yuwenfeng2019/K2S/pkg/daemons/agent"
+	"github.com/Yuwenfeng2019/K2S/pkg/rootless"
 	"github.com/rancher/norman/pkg/clientaccess"
 	"github.com/sirupsen/logrus"
 )
@@ -67,6 +68,12 @@ func run(ctx context.Context, cfg cmds.Agent) error {
 func Run(ctx context.Context, cfg cmds.Agent) error {
 	if err := validate(); err != nil {
 		return err
+	}
+
+	if cfg.Rootless {
+		if err := rootless.Rootless(cfg.DataDir); err != nil {
+			return err
+		}
 	}
 
 	cfg.DataDir = filepath.Join(cfg.DataDir, "agent")
