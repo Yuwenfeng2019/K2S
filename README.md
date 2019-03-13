@@ -1,5 +1,5 @@
 # K2S
-Yet another lightweight version for K8S, and even lighter than K3S(https://github.com/rancher/k3s/).
+Yet another lightweight version for K8S, and even lighter than K3S.
 
 K2S is base on K3S(https://github.com/rancher/k3s/) from Rancher, but there are some different design goals:
 1. focus on 64-bit system only(currently X64 & ARM64, and RISC-V 64 in the future), so corresponding code will 
