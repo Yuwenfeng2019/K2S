@@ -141,6 +141,7 @@ func NewServerCommand(action func(*cli.Context) error) cli.Command {
 			NodeNameFlag,
 			DockerFlag,
 			FlannelFlag,
+			FlannelIfaceFlag,
 			CRIEndpointFlag,
 			ResolvConfFlag,
 			ExtraKubeletArgs,
