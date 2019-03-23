@@ -1,0 +1,48 @@
+#!/bin/bash
+set -e -x
+
+source $(dirname $0)/version.sh
+
+cd $(dirname $0)/..
+
+LDFLAGS="-X github.com/rancher/K2S/pkg/version.Version=$VERSION -X github.com/rancher/K2S/pkg/version.GitCommit=${COMMIT:0:8} -w -s"
+STATIC="-extldflags '-static'"
+STATIC_SQLITE="-extldflags '-static -lm -ldl -lz -lpthread'"
+TAGS="ctrd apparmor seccomp no_btrfs netgo osusergo"
+
+if [ "$STATIC_BUILD" != "true" ]; then
+    STATIC=""
+    STATIC_SQLITE=""
+else
+    TAGS="static_build libsqlite3 $TAGS"
+fi
+
+mkdir -p bin
+
+if [ -z "$GOARM" ] && [ "arm" = "$(go env GOARCH)" ]; then
+    GOARM=7
+fi
+
+rm -f bin/K2S-agent bin/hyperkube bin/containerd bin/cni ./bin/runc bin/containerd-shim bin/K2S-server bin/kubectl bin/crictl
+# echo Building agent
+# CGO_ENABLED=1 go build -tags "$TAGS" -ldflags "$LDFLAGS $STATIC" -o bin/K2S-agent ./cmd/agent/main.go
+echo Building server
+CGO_ENABLED=1 go build -tags "$TAGS" -ldflags "$LDFLAGS $STATIC_SQLITE" -o bin/containerd ./cmd/server/main.go
+ln -s containerd ./bin/K2S-agent
+ln -s containerd ./bin/K2S-server
+ln -s containerd ./bin/kubectl
+ln -s containerd ./bin/crictl
+echo Building hyperkube
+CGO_ENABLED=1 go build -tags "$TAGS" -ldflags "$LDFLAGS $STATIC_SQLITE" -o bin/hyperkube ./vendor/k8s.io/kubernetes/cmd/hyperkube/
+#echo Building ctr
+#CGO_ENABLED=1 go build -tags "$TAGS" -ldflags "$LDFLAGS $STATIC_SQLITE" -o bin/ctr ./cmd/ctr/main.go
+# echo Building containerd
+# CGO_ENABLED=0 go build -tags "$TAGS" -ldflags "$LDFLAGS $STATIC" -o bin/containerd ./cmd/containerd/
+echo Building cni
+CGO_ENABLED=0 go build -tags "$TAGS" -ldflags "$LDFLAGS $STATIC" -o bin/cni ./cmd/cni/main.go
+echo Building runc
+make EXTRA_LDFLAGS="-w -s" BUILDTAGS="apparmor seccomp" -C ./vendor/github.com/opencontainers/runc static
+cp -f ./vendor/github.com/opencontainers/runc/runc ./bin/runc
+echo Building containerd-shim
+make -C ./vendor/github.com/containerd/containerd bin/containerd-shim
+cp -f ./vendor/github.com/containerd/containerd/bin/containerd-shim ./bin/containerd-shim

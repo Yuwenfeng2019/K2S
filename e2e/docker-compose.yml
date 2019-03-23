@@ -1,0 +1,31 @@
+version: '3'
+services:
+  server:
+    image: Yuwenfeng2019/K2S:v0.1.0-rc8
+    command: server
+    environment:
+    - K2S_CLUSTER_SECRET=somethingtotallyrandom
+    volumes:
+    - config:/etc/k2s
+    tmpfs:
+    - /run
+    - /var/run
+    privileged: true
+
+  node:
+    image: Yuwenfeng2019/K2S:v0.1.0-rc8
+    tmpfs:
+    - /run
+    - /var/run
+    privileged: true
+    environment:
+    - K2S_URL=https://server:6443
+    - K2S_CLUSTER_SECRET=somethingtotallyrandom
+
+  sonobuoy:
+    build: .
+    volumes:
+    - config:/etc/k2s
+
+volumes:
+  config: {}

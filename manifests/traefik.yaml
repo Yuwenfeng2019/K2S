@@ -1,0 +1,10 @@
+apiVersion: k2s.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  chart: https://%{KUBERNETES_API}%/static/charts/traefik-1.64.0.tgz
+  set:
+    rbac.enabled: "true"
+    ssl.enabled: "true"
