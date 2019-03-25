@@ -10,7 +10,7 @@ set -e
 #   Installing a server without an agent:
 #     curl ... | INSTALL_K2S_EXEC="--disable-agent" sh -
 #   Installing an agent to point at a server:
-#     curl ... | K2S_TOKEN=xxx K2S_URL=https://server-url:6443 sh -  
+#     curl ... | K2S_TOKEN=xxx K2S_URL=https://server-url:6443 sh - 
 #
 # Environment variables:
 #   - K2S_*
@@ -249,6 +249,15 @@ setup_binary() {
     info "Installing K2S to ${BIN_DIR}/K2S"
     $SUDO chown root:root ${TMP_BIN}
     $SUDO mv -f ${TMP_BIN} ${BIN_DIR}/K2S
+    if command -v getenforce > /dev/null 2>&1; then
+        if [ "Disabled" != `getenforce` ]; then
+            info "SeLinux is enabled, setting permissions"
+            if ! $SUDO semanage fcontext -l | grep "${BIN_DIR}/k3s" > /dev/null 2>&1; then
+                $SUDO semanage fcontext -a -t bin_t "${BIN_DIR}/k3s"
+            fi
+            $SUDO restorecon -v ${BIN_DIR}/k3s > /dev/null
+        fi
+    fi
 }
 
 # --- download and verify K2S ---
