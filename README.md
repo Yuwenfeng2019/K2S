@@ -17,3 +17,5 @@ Note:
 2) the code of K2S will limited to User Space.
 
 
+Sync with K3S:
+1) K3S v0.3.0 added Air-Gap support
