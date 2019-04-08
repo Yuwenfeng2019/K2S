@@ -24,9 +24,9 @@ import (
 	"time"
 
 	"github.com/Yuwenfeng2019/K2S/pkg/daemons/config"
+	certutil "github.com/rancher/norman/pkg/cert"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
-	certutil "k8s.io/client-go/util/cert"
 	"k8s.io/kubernetes/cmd/kube-apiserver/app"
 	cmapp "k8s.io/kubernetes/cmd/kube-controller-manager/app"
 	sapp "k8s.io/kubernetes/cmd/kube-scheduler/app"
