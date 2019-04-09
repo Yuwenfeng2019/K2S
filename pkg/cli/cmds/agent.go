@@ -119,6 +119,11 @@ func NewAgentCommand(action func(ctx *cli.Context) error) cli.Command {
 				Usage:       "(experimental) Run rootless",
 				Destination: &AgentConfig.Rootless,
 			},
+			cli.BoolFlag{
+				Name:        "rootless",
+				Usage:       "(experimental) Run rootless",
+				Destination: &AgentConfig.Rootless,
+			},
 			DockerFlag,
 			FlannelFlag,
 			NodeNameFlag,

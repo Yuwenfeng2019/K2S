@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+<<<<<<< HEAD
 	"github.com/Yuwenfeng2019/K2S/pkg/daemons/config"
 	"github.com/Yuwenfeng2019/K2S/pkg/daemons/control"
 	"github.com/Yuwenfeng2019/K2S/pkg/datadir"
@@ -27,6 +28,22 @@ import (
 	corev1 "github.com/Yuwenfeng2019/K2S/types/apis/core/v1"
 	v1 "github.com/Yuwenfeng2019/K2S/types/apis/k2s.cattle.io/v1"
 	rbacv1 "github.com/Yuwenfeng2019/K2S/types/apis/rbac.authorization.k8s.io/v1"
+=======
+	"github.com/rancher/k3s/pkg/daemons/config"
+	"github.com/rancher/k3s/pkg/daemons/control"
+	"github.com/rancher/k3s/pkg/datadir"
+	"github.com/rancher/k3s/pkg/deploy"
+	"github.com/rancher/k3s/pkg/helm"
+	"github.com/rancher/k3s/pkg/rootlessports"
+	"github.com/rancher/k3s/pkg/servicelb"
+	"github.com/rancher/k3s/pkg/static"
+	"github.com/rancher/k3s/pkg/tls"
+	appsv1 "github.com/rancher/k3s/types/apis/apps/v1"
+	batchv1 "github.com/rancher/k3s/types/apis/batch/v1"
+	corev1 "github.com/rancher/k3s/types/apis/core/v1"
+	v1 "github.com/rancher/k3s/types/apis/k3s.cattle.io/v1"
+	rbacv1 "github.com/rancher/k3s/types/apis/rbac.authorization.k8s.io/v1"
+>>>>>>> b5217e2888... Merge pull request #195 from ibuildthecloud/rootless
 	"github.com/rancher/norman"
 	"github.com/rancher/norman/pkg/clientaccess"
 	"github.com/rancher/norman/pkg/dynamiclistener"
