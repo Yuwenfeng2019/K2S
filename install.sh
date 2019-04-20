@@ -68,11 +68,17 @@ fatal()
     exit 1
 }
 
-# --- fatal if no systemd ---
-verify_systemd() {
-    if [ ! -d /run/systemd ]; then
-        fatal "Can not find systemd to use as a process supervisor for k2s"
+# --- fatal if no systemd or openrc ---
+verify_system() {
+    if [ -x /sbin/openrc-run ]; then
+        HAS_OPENRC=true
+        return
     fi
+    if [ -d /run/systemd ]; then
+        HAS_SYSTEMD=true
+        return
+    fi
+    fatal "Can not find systemd or openrc to use as a process supervisor for k2s"
 }
 
 # --- define needed environment variables ---
@@ -102,16 +108,16 @@ setup_env() {
 
     # --- use systemd name if defined or create default ---
     if [ -n "${INSTALL_K2S_NAME}" ]; then
-        SYSTEMD_NAME=K2S-${INSTALL_K2S_NAME}
+        SYSTEM_NAME=k2s-${INSTALL_K2S_NAME}
     else
         if [ "${CMD_K2S}" = "server" ]; then
-            SYSTEMD_NAME=K2S
+            SYSTEM_NAME=k2s
         else
-            SYSTEMD_NAME=K2S-${CMD_K2S}
+            SYSTEM_NAME=k2s-${CMD_K2S}
         fi
     fi
-    SERVICE_K2S=${SYSTEMD_NAME}.service
-    UNINSTALL_K2S_SH=${SYSTEMD_NAME}-uninstall.sh
+    SERVICE_K2S=${SYSTEM_NAME}.service
+    UNINSTALL_K2S_SH=${SYSTEM_NAME}-uninstall.sh
 
     # --- use systemd type if defined or create default ---
     if [ -n "${INSTALL_K2S_TYPE}" ]; then
@@ -136,6 +142,16 @@ setup_env() {
         SYSTEMD_DIR="${INSTALL_K2S_SYSTEMD_DIR}"
     else
         SYSTEMD_DIR="/etc/systemd/system"
+    fi
+
+    # --- use servive or environment location depending on systemd/openrc ---
+    if [ "${HAS_SYSTEMD}" = "true" ]; then
+        FILE_K2S_SERVICE=${SYSTEMD_DIR}/${SERVICE_K2S}
+        FILE_K2S_ENV=${SYSTEMD_DIR}/${SERVICE_K2S}.env
+    elif [ "${HAS_OPENRC}" = "true" ]; then
+        $SUDO mkdir -p /etc/rancher/k2s
+        FILE_K2S_SERVICE=/etc/init.d/${SYSTEM_NAME}
+        FILE_K2S_ENV=/etc/rancher/k2s/${SYSTEM_NAME}.env
     fi
 
     # --- use sudo if we are not already root ---
@@ -252,10 +268,10 @@ setup_binary() {
     if command -v getenforce > /dev/null 2>&1; then
         if [ "Disabled" != `getenforce` ]; then
             info "SeLinux is enabled, setting permissions"
-            if ! $SUDO semanage fcontext -l | grep "${BIN_DIR}/k3s" > /dev/null 2>&1; then
-                $SUDO semanage fcontext -a -t bin_t "${BIN_DIR}/k3s"
+            if ! $SUDO semanage fcontext -l | grep "${BIN_DIR}/k2s" > /dev/null 2>&1; then
+                $SUDO semanage fcontext -a -t bin_t "${BIN_DIR}/k2s"
             fi
-            $SUDO restorecon -v ${BIN_DIR}/k3s > /dev/null
+            $SUDO restorecon -v ${BIN_DIR}/k2s > /dev/null
         fi
     fi
 }
@@ -303,20 +319,22 @@ create_uninstall() {
     $SUDO tee ${BIN_DIR}/${UNINSTALL_K2S_SH} >/dev/null << EOF
 #!/bin/sh
 set -x
-systemctl kill ${SYSTEMD_NAME}
-systemctl disable ${SYSTEMD_NAME}
-systemctl reset-failed ${SYSTEMD_NAME}
-systemctl daemon-reload
-rm -f ${SYSTEMD_DIR}/${SERVICE_K2S}
-rm -f ${SYSTEMD_DIR}/${SERVICE_K2S}.env
+if which systemctl; then
+    systemctl kill ${SYSTEM_NAME}
+    systemctl disable ${SYSTEM_NAME}
+    systemctl reset-failed ${SYSTEM_NAME}
+    systemctl daemon-reload
+fi
+rm -f ${FILE_K2S_SERVICE}
+rm -f ${FILE_K2S_ENV}
 
 remove_uninstall() {
     rm -f ${BIN_DIR}/${UNINSTALL_K2S_SH}
 }
 trap remove_uninstall EXIT
 
-if ls ${SYSTEMD_DIR}/K2S*.service >/dev/null 2>&1; then
-    set +x; echo "Additional K2S services installed, skipping uninstall of K2S"; set -x
+if (ls ${SYSTEMD_DIR}/k2s*.service || ls /etc/init.d/k2s*) >/dev/null 2>&1; then
+    set +x; echo "Additional k2s services installed, skipping uninstall of k2s"; set -x
     exit
 fi
 
@@ -355,22 +373,22 @@ EOF
 systemd_disable() {
     $SUDO rm -f /etc/systemd/system/${SERVICE_K2S} || true
     $SUDO rm -f /etc/systemd/system/${SERVICE_K2S}.env || true
-    $SUDO systemctl disable ${SYSTEMD_NAME} >/dev/null 2>&1 || true
+    $SUDO systemctl disable ${SYSTEM_NAME} >/dev/null 2>&1 || true
 }
 
 # --- capture current env and create file containing K2S_ variables ---
 create_env_file() {
-    info "systemd: Creating environment file ${SYSTEMD_DIR}/${SERVICE_K2S}.env"
+    info "env: Creating environment file ${FILE_K2S_ENV}"
     UMASK=`umask`
     umask 0377
-    env | grep '^K2S_' | $SUDO tee ${SYSTEMD_DIR}/${SERVICE_K2S}.env >/dev/null
+    env | grep '^K2S_' | $SUDO tee ${FILE_K2S_ENV} >/dev/null
     umask $UMASK
 }
 
-# --- write service file ---
-create_service_file() {
-    info "systemd: Creating service file ${SYSTEMD_DIR}/${SERVICE_K2S}"
-    $SUDO tee ${SYSTEMD_DIR}/${SERVICE_K2S} >/dev/null << EOF
+# --- write systemd service file ---
+create_systemd_service_file() {
+    info "systemd: Creating service file ${FILE_K2S_SERVICE}"
+    $SUDO tee ${FILE_K2S_SERVICE} >/dev/null << EOF
 [Unit]
 Description=Lightweight Kubernetes
 Documentation=https://K2S.io
@@ -378,7 +396,7 @@ After=network.target
 
 [Service]
 Type=${SYSTEMD_TYPE}
-EnvironmentFile=${SYSTEMD_DIR}/${SERVICE_K2S}.env
+EnvironmentFile=${FILE_K2S_ENV}
 ExecStartPre=-/sbin/modprobe br_netfilter
 ExecStartPre=-/sbin/modprobe overlay
 ExecStart=${BIN_DIR}/K2S ${CMD_K2S_EXEC}
@@ -395,19 +413,86 @@ WantedBy=multi-user.target
 EOF
 }
 
+# --- write openrc service file ---
+create_openrc_service_file() {
+    LOG_FILE=/var/log/${SYSTEM_NAME}.log
+
+    info "openrc: Creating service file ${FILE_K2S_SERVICE}"
+    $SUDO tee ${FILE_K2S_SERVICE} >/dev/null << EOF
+#!/sbin/openrc-run
+
+depend() {
+    after net-online
+    need net
+}
+
+start_pre() {
+    rm -f /tmp/k2s.*
+}
+
+supervisor=supervise-daemon
+name="${SYSTEM_NAME}"
+command="/usr/local/bin/k2s"
+command_args="${CMD_K2S_EXEC} >>${LOG_FILE} 2>&1"
+pidfile="/var/run/${SYSTEM_NAME}.pid"
+respawn_delay=5
+
+set -o allexport
+if [ -f /etc/environment ]; then source /etc/environment; fi
+if [ -f ${FILE_K2S_ENV} ]; then source ${FILE_K2S_ENV}; fi
+set +o allexport
+EOF
+    $SUDO chmod 0755 ${FILE_K2S_SERVICE}
+
+    $SUDO tee /etc/logrotate.d/${SYSTEM_NAME} >/dev/null << EOF
+${LOG_FILE} {
+	missingok
+	notifempty
+	copytruncate
+}
+EOF
+}
+
+# --- write systemd or openrc service file ---
+create_service_file() {
+    if [ "${HAS_SYSTEMD}" = "true" ]; then
+        create_systemd_service_file
+    elif [ "${HAS_OPENRC}" = "true" ]; then
+        create_openrc_service_file
+    fi
+}
+
 # --- enable and start systemd service ---
 systemd_enable_and_start() {
-    info "systemd: Enabling ${SYSTEMD_NAME} unit"
-    $SUDO systemctl enable ${SYSTEMD_DIR}/${SERVICE_K2S} >/dev/null
+    info "systemd: Enabling ${SYSTEM_NAME} unit"
+    $SUDO systemctl enable ${FILE_K2S_SERVICE} >/dev/null
     $SUDO systemctl daemon-reload >/dev/null
 
-    info "systemd: Starting ${SYSTEMD_NAME}"
-    $SUDO systemctl restart ${SYSTEMD_NAME}
+    info "systemd: Starting ${SYSTEM_NAME}"
+    $SUDO systemctl restart ${SYSTEM_NAME}
+}
+
+# --- enable and start openrc service ---
+openrc_enable_and_start() {
+    info "openrc: Enabling ${SYSTEM_NAME} service for default runlevel"
+    $SUDO rc-update add ${SYSTEM_NAME} default >/dev/null
+
+    info "openrc: Starting ${SYSTEM_NAME}"
+    $SUDO ${FILE_K2S_SERVICE} restart
+}
+
+# --- startup systemd or openrc service ---
+service_enable_and_start() {
+    if [ "${HAS_SYSTEMD}" = "true" ]; then
+        systemd_enable_and_start
+    elif [ "${HAS_OPENRC}" = "true" ]; then
+        openrc_enable_and_start
+    fi
 }
 
 # --- run the install process --
 {
-    verify_systemd
+    verify_system
     setup_env ${INSTALL_K2S_EXEC} $@
     download_and_verify
     create_symlinks
@@ -415,5 +500,5 @@ systemd_enable_and_start() {
     systemd_disable
     create_env_file
     create_service_file
-    systemd_enable_and_start
+    service_enable_and_start
 }
