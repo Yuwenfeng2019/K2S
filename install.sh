@@ -22,8 +22,11 @@ set -e
 #   - INSTALL_K2S_SKIP_DOWNLOAD
 #     If set to true will not download K2S hash or binary.
 #
+#   - INSTALL_K2S_SKIP_START
+#     If set to true will not start k2s service.
+#
 #   - INSTALL_K2S_VERSION
-#     Version of K2S to download from github. Will attempt to download the
+#     Version of k2s to download from github. Will attempt to download the
 #     latest version if not specified.
 #
 #   - INSTALL_K2S_BIN_DIR
@@ -468,6 +471,7 @@ systemd_enable_and_start() {
     $SUDO systemctl enable ${FILE_K2S_SERVICE} >/dev/null
     $SUDO systemctl daemon-reload >/dev/null
 
+    [ "${INSTALL_K2S_SKIP_START}" = "true" ] && return
     info "systemd: Starting ${SYSTEM_NAME}"
     $SUDO systemctl restart ${SYSTEM_NAME}
 }
@@ -477,6 +481,7 @@ openrc_enable_and_start() {
     info "openrc: Enabling ${SYSTEM_NAME} service for default runlevel"
     $SUDO rc-update add ${SYSTEM_NAME} default >/dev/null
 
+    [ "${INSTALL_K2S_SKIP_START}" = "true" ] && return
     info "openrc: Starting ${SYSTEM_NAME}"
     $SUDO ${FILE_K2S_SERVICE} restart
 }
