@@ -435,7 +435,7 @@ start_pre() {
 
 supervisor=supervise-daemon
 name="${SYSTEM_NAME}"
-command="/usr/local/bin/k2s"
+command="${BIN_DIR}/k2s"
 command_args="${CMD_K2S_EXEC} >>${LOG_FILE} 2>&1"
 pidfile="/var/run/${SYSTEM_NAME}.pid"
 respawn_delay=5
