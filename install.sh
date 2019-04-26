@@ -168,8 +168,8 @@ setup_env() {
     fi
 
     PRE_INSTALL_HASHES=`get_installed_hashes`
-    if [ "${INSTALL_K3S_BIN_DIR_READ_ONLY}" = "true" ]; then
-        INSTALL_K3S_SKIP_DOWNLOAD=true
+    if [ "${INSTALL_K2S_BIN_DIR_READ_ONLY}" = "true" ]; then
+        INSTALL_K2S_SKIP_DOWNLOAD=true
     fi
 }
 
@@ -314,7 +314,7 @@ download_and_verify() {
 
 # --- add additional utility links ---
 create_symlinks() {
-    [ "${INSTALL_K3S_BIN_DIR_READ_ONLY}" = "true" ] && return
+    [ "${INSTALL_K2S_BIN_DIR_READ_ONLY}" = "true" ] && return
     if [ ! -e ${BIN_DIR}/kubectl ]; then
         info "Creating ${BIN_DIR}/kubectl symlink to K2S"
         $SUDO ln -s K2S ${BIN_DIR}/kubectl
