@@ -471,6 +471,7 @@ EOF
 create_service_file() {
     [ "${HAS_SYSTEMD}" = "true" ] && create_systemd_service_file
     [ "${HAS_OPENRC}" = "true" ] && create_openrc_service_file
+    return 0
 }
 
 # --- get hashes of the current k2s bin and service files
@@ -516,6 +517,7 @@ service_enable_and_start() {
 
     [ "${HAS_SYSTEMD}" = "true" ] && systemd_start
     [ "${HAS_OPENRC}" = "true" ] && openrc_start
+    return 0
 }
 
 # --- run the install process --
