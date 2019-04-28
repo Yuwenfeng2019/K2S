@@ -189,7 +189,9 @@ verify_K2S_is_executable() {
 
 # --- set arch and suffix, fatal if architecture not supported ---
 setup_verify_arch() {
-    ARCH=`uname -m`
+    if [ -z "$ARCH" ]; then
+        ARCH=`uname -m`
+    fi
     case $ARCH in
         arm64)
             ARCH=arm64
