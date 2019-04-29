@@ -1,5 +1,86 @@
 ---
 kind: pipeline
+name: amd64
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: rancher/dapper:v0.4.1
+  commands:
+  - dapper ci
+  volumes:
+  - name: docker
+    path: /var/run/docker.sock
+
+- name: sonobuoy-e2e-tests
+  image: rancher/dapper:v0.4.1
+  commands:
+  - dapper -f Dockerfile.sonobuoy.dapper sonobuoy-e2e-tests
+  volumes:
+  - name: docker
+    path: /var/run/docker.sock
+  when:
+    instance:
+    - drone-publish.rancher.io
+    ref:
+      include:
+      - refs/head/master
+      - refs/tags/*
+      exclude:
+      - refs/tags/*-k2s.*
+    event:
+    - tag
+
+- name: github_binary_release
+  image: ibuildthecloud/github-release:v0.0.1
+  settings:
+    api_key:
+      from_secret: github_token
+    prerelease: true
+    checksum:
+    - sha256
+    checksum_file: CHECKSUMsum-amd64.txt
+    checksum_flatten: true
+    files:
+    - "dist/artifacts/*"
+  when:
+    instance:
+    - drone-publish.rancher.io
+    ref:
+    - refs/head/master
+    - refs/tags/*
+    event:
+    - tag
+
+- name: docker-publish
+  image: plugins/docker
+  settings:
+    dockerfile: package/Dockerfile
+    password:
+      from_secret: docker_password
+    repo: "rancher/k2s"
+    tag: "${DRONE_TAG}-amd64"
+    username:
+      from_secret: docker_username
+  when:
+    instance:
+    - drone-publish.rancher.io
+    ref:
+    - refs/head/master
+    - refs/tags/*
+    event:
+    - tag
+
+volumes:
+- name: docker
+  host:
+    path: /var/run/docker.sock
+
+---
+kind: pipeline
 name: arm64
 
 platform:
