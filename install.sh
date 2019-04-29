@@ -407,8 +407,8 @@ create_systemd_service_file() {
     $SUDO tee ${FILE_K2S_SERVICE} >/dev/null << EOF
 [Unit]
 Description=Lightweight Kubernetes
-Documentation=https://K2S.io
-After=network.target
+Documentation=https://k2s.io
+After=network-online.target
 
 [Service]
 Type=${SYSTEMD_TYPE}
