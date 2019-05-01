@@ -125,6 +125,13 @@ setup_env() {
     fi
     SERVICE_K2S=${SYSTEM_NAME}.service
     UNINSTALL_K2S_SH=${SYSTEM_NAME}-uninstall.sh
+    KILLALL_K2S_SH=k2s-killall.sh
+
+    # --- use sudo if we are not already root ---
+    SUDO=sudo
+    if [ `id -u` = 0 ]; then
+        SUDO=
+    fi
 
     # --- use systemd type if defined or create default ---
     if [ -n "${INSTALL_K2S_TYPE}" ]; then
@@ -161,13 +168,10 @@ setup_env() {
         FILE_K2S_ENV=/etc/rancher/k2s/${SYSTEM_NAME}.env
     fi
 
-    # --- use sudo if we are not already root ---
-    SUDO=sudo
-    if [ `id -u` = 0 ]; then
-        SUDO=
-    fi
-
+    # --- get hash of config & exec for currently installed k2s ---
     PRE_INSTALL_HASHES=`get_installed_hashes`
+
+    # --- if bin directory is read only skip download ---
     if [ "${INSTALL_K2S_BIN_DIR_READ_ONLY}" = "true" ]; then
         INSTALL_K2S_SKIP_DOWNLOAD=true
     fi
@@ -328,6 +332,63 @@ create_symlinks() {
     fi
 }
 
+
+# --- create killall script ---
+create_killall() {
+    [ "${INSTALL_K2S_BIN_DIR_READ_ONLY}" = "true" ] && return
+    info "Creating killall script ${BIN_DIR}/${KILLALL_K2S_SH}"
+    $SUDO tee ${BIN_DIR}/${KILLALL_K2S_SH} >/dev/null << \EOF
+#!/bin/sh
+set -x
+[ `id -u` = 0 ] || exec sudo $0 $@
+
+for bin in /var/lib/yuwenfeng2019/k2s/data/**/bin/; do
+    [ -d $bin ] && export PATH=$bin:$PATH
+done
+
+for service in /etc/systemd/system/k2s*.service; do
+    [ -s $service ] && systemctl stop $(basename $service)
+done
+
+for service in /etc/init.d/k2s*; do
+    [ -x $service ] && $service stop
+done
+
+pstree() {
+    for pid in $@; do
+        echo $pid
+        pstree $(ps -o ppid= -o pid= | awk "\$1==$pid {print \$2}")
+    done
+}
+
+killtree() {
+    [ $# -ne 0 ] && kill $(set +x; pstree $@; set -x)
+}
+
+killtree $(lsof | sed -e 's/^[^0-9]*//g; s/  */\t/g' | grep -w 'k2s/data/[^/]*/bin/containerd-shim' | cut -f1 | sort -n -u)
+
+do_unmount() {
+    MOUNTS=`cat /proc/self/mounts | awk '{print $2}' | grep "^$1" | sort -r`
+    if [ -n "${MOUNTS}" ]; then
+        umount ${MOUNTS}
+    fi
+}
+
+do_unmount '/run/k2s'
+do_unmount '/var/lib/rancher/k2s'
+
+nets=$(ip link show | grep 'master cni0' | awk -F': ' '{print $2}' | sed -e 's|@.*||')
+for iface in $nets; do
+    ip link delete $iface;
+done
+ip link delete cni0
+ip link delete flannel.1
+rm -rf /var/lib/cni/
+EOF
+    $SUDO chmod 755 ${BIN_DIR}/${KILLALL_K2S_SH}
+    $SUDO chown root:root ${BIN_DIR}/${KILLALL_K2S_SH}
+}
+
 # --- create uninstall script ---
 create_uninstall() {
     [ "${INSTALL_K2S_BIN_DIR_READ_ONLY}" = "true" ] && return
@@ -335,12 +396,19 @@ create_uninstall() {
     $SUDO tee ${BIN_DIR}/${UNINSTALL_K2S_SH} >/dev/null << EOF
 #!/bin/sh
 set -x
+[ \`id -u\` = 0 ] || exec sudo \$0 \$@
+
+${BIN_DIR}/${KILLALL_K2S_SH}
+
 if which systemctl; then
-    systemctl kill ${SYSTEM_NAME}
     systemctl disable ${SYSTEM_NAME}
     systemctl reset-failed ${SYSTEM_NAME}
     systemctl daemon-reload
 fi
+if which rc-update; then
+    rc-update delete ${SYSTEM_NAME} default
+fi
+
 rm -f ${FILE_K2S_SERVICE}
 rm -f ${FILE_K2S_ENV}
 
@@ -354,22 +422,6 @@ if (ls ${SYSTEMD_DIR}/k2s*.service || ls /etc/init.d/k2s*) >/dev/null 2>&1; then
     exit
 fi
 
-do_unmount() {
-    MOUNTS=\`cat /proc/self/mounts | awk '{print \$2}' | grep "^\$1"\`
-    if [ -n "\${MOUNTS}" ]; then
-        umount \${MOUNTS}
-    fi
-}
-do_unmount '/run/K2S'
-do_unmount '/var/lib/rancher/K2S'
-
-nets=\$(ip link show master cni0 | grep cni0 | awk -F': ' '{print \$2}' | sed -e 's|@.*||')
-for iface in \$nets; do
-    ip link delete \$iface;
-done
-ip link delete cni0
-ip link delete flannel.1
-
 if [ -L ${BIN_DIR}/kubectl ]; then
     rm -f ${BIN_DIR}/kubectl
 fi
@@ -377,9 +429,10 @@ if [ -L ${BIN_DIR}/crictl ]; then
     rm -f ${BIN_DIR}/crictl
 fi
 
-rm -rf /etc/rancher/K2S
-rm -rf /var/lib/rancher/K2S
-rm -f ${BIN_DIR}/K2S
+rm -rf /etc/yuwenfeng2019/k2s
+rm -rf /var/lib/yuwenfeng2019/k2s
+rm -f ${BIN_DIR}/k2s
+rm -f ${BIN_DIR}/${KILLALL_K2S_SH}
 EOF
     $SUDO chmod 755 ${BIN_DIR}/${UNINSTALL_K2S_SH}
     $SUDO chown root:root ${BIN_DIR}/${UNINSTALL_K2S_SH}
@@ -478,7 +531,7 @@ create_service_file() {
 
 # --- get hashes of the current k2s bin and service files
 get_installed_hashes() {
-    sha256sum ${BIN_DIR}/k2s ${FILE_K2S_SERVICE} ${FILE_K2S_ENV} 2>&1 || true
+    $SUDO sha256sum ${BIN_DIR}/k2s ${FILE_K2S_SERVICE} ${FILE_K2S_ENV} 2>&1 || true
 }
 
 # --- enable and start systemd service ---
@@ -528,6 +581,7 @@ service_enable_and_start() {
     setup_env ${INSTALL_K2S_EXEC} $@
     download_and_verify
     create_symlinks
+    create_killall
     create_uninstall
     systemd_disable
     create_env_file
