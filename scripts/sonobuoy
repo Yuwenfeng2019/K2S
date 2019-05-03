@@ -4,8 +4,8 @@ set -xe
 
 cd $(dirname $0)/..
 
-if [ -z "${K3S_IMAGE}" ]; then
-    echo "K3S_IMAGE environment variable should be defined"
+if [ -z "${K2S_IMAGE}" ]; then
+    echo "K2S_IMAGE environment variable should be defined"
     exit 1
 fi
 
@@ -25,13 +25,13 @@ get-port() {
 }
 export -f get-port
 
-K3S_PORT=$(timeout --foreground 5s bash -c get-port)
-OUTPUT=$(pwd)/sonobuoy-output/${K3S_PORT}
+K2S_PORT=$(timeout --foreground 5s bash -c get-port)
+OUTPUT=$(pwd)/sonobuoy-output/${K2S_PORT}
 mkdir -p ${OUTPUT}
 
 SECRET=random-$((100000 + RANDOM % 999999))
-export K3S_AGENT=sonobuoy-k3s-agent-${K3S_PORT}
-export K3S_SERVER=sonobuoy-k3s-server-${K3S_PORT}
+export K2S_AGENT=sonobuoy-k2s-agent-${K2S_PORT}
+export K2S_SERVER=sonobuoy-k2s-server-${K2S_PORT}
 export KUBECONFIG=${OUTPUT}/kubeconfig.yaml
 
 # ---
@@ -40,8 +40,8 @@ cleanup() {
     exit_status=$?
     set +e
     echo "Cleaning up"
-    for container in ${K3S_SERVER} ${K3S_AGENT}; do
-        docker cp ${container}:/var/lib/rancher/k3s/agent/containerd/containerd.log ${OUTPUT}/${container}-containerd.log
+    for container in ${K2S_SERVER} ${K2S_AGENT}; do
+        docker cp ${container}:/var/lib/yuwenfeng2019/k2s/agent/containerd/containerd.log ${OUTPUT}/${container}-containerd.log
         docker logs ${container} >${OUTPUT}/${container}.log 2>&1
         docker rm -f ${container} 2>/dev/null
         if [ ${exit_status} -ne 0 ]; then
@@ -56,18 +56,18 @@ trap cleanup EXIT
 
 # ---
 
-docker run -d --name ${K3S_SERVER} --privileged \
-    -p 127.0.0.1:${K3S_PORT}:${K3S_PORT} \
-    -e K3S_CLUSTER_SECRET=${SECRET} \
-    ${K3S_IMAGE} server --no-deploy=traefik --https-listen-port=${K3S_PORT}
+docker run -d --name ${K2S_SERVER} --privileged \
+    -p 127.0.0.1:${K2S_PORT}:${K2S_PORT} \
+    -e K2S_CLUSTER_SECRET=${SECRET} \
+    ${K2S_IMAGE} server --no-deploy=traefik --https-listen-port=${K2S_PORT}
 
-K3S_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${K3S_SERVER})
-echo "Started ${K3S_SERVER} @ ${K3S_IP}:${K3S_PORT}"
+K2S_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${K2S_SERVER})
+echo "Started ${K2S_SERVER} @ ${K2S_IP}:${K2S_PORT}"
 
 # ---
 
 fetch-kubeconfig() {
-    docker cp ${K3S_SERVER}:/etc/rancher/k3s/k3s.yaml ${KUBECONFIG} 2>/dev/null
+    docker cp ${K2S_SERVER}:/etc/yuwenfeng2019/k2s/k2s.yaml ${KUBECONFIG} 2>/dev/null
 }
 export -f fetch-kubeconfig
 
@@ -83,12 +83,12 @@ timeout --foreground 1m bash -c wait-for-kubeconfig
 
 # ---
 
-docker run -d --name ${K3S_AGENT} --privileged \
-    -e K3S_CLUSTER_SECRET=${SECRET} \
-    -e K3S_URL=https://${K3S_IP}:${K3S_PORT} \
-    ${K3S_IMAGE} agent
+docker run -d --name ${K2S_AGENT} --privileged \
+    -e K2S_CLUSTER_SECRET=${SECRET} \
+    -e K2S_URL=https://${K2S_IP}:${K2S_PORT} \
+    ${K2S_IMAGE} agent
 
-echo "Started ${K3S_AGENT}"
+echo "Started ${K2S_AGENT}"
 
 # ---
 
