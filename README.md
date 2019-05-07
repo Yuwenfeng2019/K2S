@@ -19,4 +19,4 @@ Note:
 
 Sync with K3S:
 1) K3S v0.3.0 added Air-Gap support
-2) currently 0.4.0
+2) currently 0.5.0
