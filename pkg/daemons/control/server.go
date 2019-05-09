@@ -23,8 +23,8 @@ import (
 	"strings"
 	"time"
 
+	certutil "github.com/rancher/dynamiclistener/cert"
 	"github.com/Yuwenfeng2019/K2S/pkg/daemons/config"
-	certutil "github.com/rancher/norman/pkg/cert"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/kubernetes/cmd/kube-apiserver/app"

@@ -1,8 +1,8 @@
 package server
 
 import (
+	"github.com/rancher/dynamiclistener"
 	"github.com/Yuwenfeng2019/K2S/pkg/daemons/config"
-	"github.com/rancher/norman/pkg/dynamiclistener"
 )
 
 type Config struct {

@@ -16,9 +16,9 @@ import (
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/syssetup"
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/tunnel"
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/cmds"
+	"github.com/Yuwenfeng2019/K2S/pkg/clientaccess"
 	"github.com/Yuwenfeng2019/K2S/pkg/daemons/agent"
 	"github.com/Yuwenfeng2019/K2S/pkg/rootless"
-	"github.com/rancher/norman/pkg/clientaccess"
 	"github.com/sirupsen/logrus"
 )
 

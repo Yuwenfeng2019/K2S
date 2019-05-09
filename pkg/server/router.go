@@ -15,9 +15,9 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	certutil "github.com/rancher/dynamiclistener/cert"
 	"github.com/Yuwenfeng2019/K2S/pkg/daemons/config"
 	"github.com/Yuwenfeng2019/K2S/pkg/openapi"
-	certutil "github.com/rancher/norman/pkg/cert"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/kubernetes/pkg/master"

@@ -8,10 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rancher/wrangler/pkg/signals"
+
 	"github.com/Yuwenfeng2019/K2S/pkg/agent"
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/cmds"
 	"github.com/Yuwenfeng2019/K2S/pkg/datadir"
-	"github.com/rancher/norman/signal"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
@@ -67,7 +68,7 @@ func Run(ctx *cli.Context) error {
 	cfg.DataDir = dataDir
 	cfg.Labels = append(cfg.Labels, "node-role.kubernetes.io/worker=true")
 
-	contextCtx := signal.SigTermCancelContext(context.Background())
+	contextCtx := signals.SetupSignalHandler(context.Background())
 
 	return agent.Run(contextCtx, cfg)
 }

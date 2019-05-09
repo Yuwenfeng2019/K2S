@@ -21,8 +21,8 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/cmds"
+	"github.com/Yuwenfeng2019/K2S/pkg/clientaccess"
 	"github.com/Yuwenfeng2019/K2S/pkg/daemons/config"
-	"github.com/rancher/norman/pkg/clientaccess"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/net"

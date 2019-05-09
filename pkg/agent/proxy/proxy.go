@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/Yuwenfeng2019/K2S/pkg/daemons/config"
-	"github.com/rancher/norman/pkg/proxy"
+	"github.com/Yuwenfeng2019/K2S/pkg/proxy"
 	"github.com/sirupsen/logrus"
 )
 

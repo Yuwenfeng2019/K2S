@@ -19,7 +19,7 @@ import (
 	"github.com/Yuwenfeng2019/K2S/pkg/datadir"
 	"github.com/Yuwenfeng2019/K2S/pkg/rootless"
 	"github.com/Yuwenfeng2019/K2S/pkg/server"
-	"github.com/rancher/norman/signal"
+	"github.com/rancher/wrangler/pkg/signals"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"k8s.io/apimachinery/pkg/util/net"
@@ -145,7 +145,7 @@ func run(app *cli.Context, cfg *cmds.Server) error {
 	notifySocket := os.Getenv("NOTIFY_SOCKET")
 	os.Unsetenv("NOTIFY_SOCKET")
 
-	ctx := signal.SigTermCancelContext(context.Background())
+	ctx := signals.SetupSignalHandler(context.Background())
 	certs, err := server.StartServer(ctx, &serverConfig)
 	if err != nil {
 		return err
