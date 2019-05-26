@@ -1,8 +1,10 @@
-# Build a Kubernetes cluster using k3s via Ansible.
+# Build a Kubernetes cluster using k2s via Ansible.
 
-## K3s Ansible Playbook
+Author: https://github.com/itwars
 
-Build a Kubernetes cluster using Ansible with k3s. The goal is easily install a Kubernetes cluster on machines running:
+## K2s Ansible Playbook
+
+Build a Kubernetes cluster using Ansible with k2s. The goal is easily install a Kubernetes cluster on machines running:
 
 - [X] Debian 
 - [ ] Ubuntu 
