@@ -6,15 +6,13 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/rancher/wrangler/pkg/slice"
-
-	"github.com/rancher/wrangler/pkg/relatedresource"
-
-	appclient "github.com/Yuwenfeng2019/K2S/pkg/generated/controllers/apps/v1"
-	coreclient "github.com/Yuwenfeng2019/K2S/pkg/generated/controllers/core/v1"
+	appclient "github.com/rancher/wrangler-api/pkg/generated/controllers/apps/v1"
+	coreclient "github.com/rancher/wrangler-api/pkg/generated/controllers/core/v1"
 	"github.com/rancher/wrangler/pkg/apply"
 	"github.com/rancher/wrangler/pkg/condition"
 	"github.com/rancher/wrangler/pkg/objectset"
+	"github.com/rancher/wrangler/pkg/relatedresource"
+	"github.com/rancher/wrangler/pkg/slice"
 	"github.com/sirupsen/logrus"
 	apps "k8s.io/api/apps/v1"
 	core "k8s.io/api/core/v1"
@@ -346,7 +344,7 @@ func (h *handler) newDaemonSet(svc *core.Service) (*apps.DaemonSet, error) {
 
 		ds.Spec.Template.Spec.Containers = append(ds.Spec.Template.Spec.Containers, container)
 	}
-	// Add node selector only if label "svccontroller.k3s.cattle.io/enablelb" exists on the nodes
+	// Add node selector only if label "svccontroller.k2s.cattle.io/enablelb" exists on the nodes
 	selector, err := labels.Parse(daemonsetNodeLabel)
 	if err != nil {
 		return nil, err

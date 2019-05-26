@@ -15,16 +15,17 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rancher/dynamiclistener"
-	"github.com/Yuwenfeng2019/pkg/clientaccess"
-	"github.com/Yuwenfeng2019/pkg/daemons/config"
-	"github.com/Yuwenfeng2019/pkg/daemons/control"
-	"github.com/Yuwenfeng2019/pkg/datadir"
-	"github.com/Yuwenfeng2019/pkg/deploy"
-	"github.com/Yuwenfeng2019/pkg/node"
-	"github.com/Yuwenfeng2019/pkg/rootlessports"
-	"github.com/Yuwenfeng2019/pkg/servicelb"
-	"github.com/Yuwenfeng2019/pkg/static"
-	"github.com/Yuwenfeng2019/pkg/tls"
+	"github.com/rancher/helm-controller/pkg/helm"
+	"github.com/Yuwenfeng2019/K2S/pkg/clientaccess"
+	"github.com/Yuwenfeng2019/K2S/pkg/daemons/config"
+	"github.com/Yuwenfeng2019/K2S/pkg/daemons/control"
+	"github.com/Yuwenfeng2019/K2S/pkg/datadir"
+	"github.com/Yuwenfeng2019/K2S/pkg/deploy"
+	"github.com/Yuwenfeng2019/K2S/pkg/node"
+	"github.com/Yuwenfeng2019/K2S/pkg/rootlessports"
+	"github.com/Yuwenfeng2019/K2S/pkg/servicelb"
+	"github.com/Yuwenfeng2019/K2S/pkg/static"
+	"github.com/Yuwenfeng2019/K2S/pkg/tls"
 	"github.com/rancher/wrangler/pkg/leader"
 	"github.com/rancher/wrangler/pkg/resolvehome"
 	"github.com/sirupsen/logrus"
@@ -189,7 +190,11 @@ func masterControllers(ctx context.Context, sc *Context, config *Config) error {
 		return err
 	}
 
-	//helm.Register
+	helm.Register(ctx, sc.Apply,
+		sc.Helm.Helm().V1().HelmChart(),
+		sc.Batch.Batch().V1().Job(),
+		sc.Auth.Rbac().V1().ClusterRoleBinding(),
+		sc.Core.Core().V1().ServiceAccount())
 
 	if err := servicelb.Register(ctx,
 		sc.K8s,
@@ -227,7 +232,7 @@ func stageFiles(ctx context.Context, sc *Context, controlConfig *config.Control)
 		return err
 	}
 
-	return deploy.WatchFiles(ctx, sc.K3s.K3s().V1().Addon(), dataDir)
+	return deploy.WatchFiles(ctx, sc.Apply, sc.K3s.K3s().V1().Addon(), dataDir)
 }
 
 func HomeKubeConfig(write, rootless bool) (string, error) {
