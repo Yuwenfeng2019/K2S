@@ -40,6 +40,9 @@ node
 Start provisioning of the cluster using the following command:
 
 ```
-ansible-playbook site.yaml
+ansible-playbook site.yml
 ```
 
+## Kubeconfig
+
+To get access to your **Kubernetes** cluster just scp debian@master_pi:~/kube/config ~/.kube/config
