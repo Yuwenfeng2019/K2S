@@ -84,73 +84,12 @@ func startWrangler(ctx context.Context, config *Config) (string, error) {
 		return tlsServer.CACert()
 	})
 
-<<<<<<< HEAD
-	normanConfig := &norman.Config{
-		Name:       "k2s",
-		KubeConfig: controlConfig.Runtime.KubeConfigSystem,
-		Clients: []norman.ClientFactory{
-			v1.Factory,
-			appsv1.Factory,
-			corev1.Factory,
-			batchv1.Factory,
-			rbacv1.Factory,
-		},
-		Schemas: []*types.Schemas{
-			v1.Schemas,
-		},
-		CRDs: map[*types.APIVersion][]string{
-			&v1.APIVersion: {
-				v1.ListenerConfigGroupVersionKind.Kind,
-				v1.AddonGroupVersionKind.Kind,
-				v1.HelmChartGroupVersionKind.Kind,
-			},
-		},
-		IgnoredKubeConfigEnv: true,
-		GlobalSetup: func(ctx context.Context) (context.Context, error) {
-			tlsServer, err = tls.NewServer(ctx, v1.ClientsFrom(ctx).ListenerConfig, *tlsConfig)
-			return ctx, err
-		},
-		DisableLeaderElection: true,
-		MasterControllers: []norman.ControllerRegister{
-			node.Register,
-			helm.Register,
-			func(ctx context.Context) error {
-				return servicelb.Register(ctx, norman.GetServer(ctx).K8sClient, !config.DisableServiceLB,
-					config.Rootless)
-			},
-			func(ctx context.Context) error {
-				dataDir := filepath.Join(controlConfig.DataDir, "static")
-				return static.Stage(dataDir)
-			},
-			func(ctx context.Context) error {
-				dataDir := filepath.Join(controlConfig.DataDir, "manifests")
-				templateVars := map[string]string{"%{CLUSTER_DNS}%": controlConfig.ClusterDNS.String(), "%{CLUSTER_DOMAIN}%": controlConfig.ClusterDomain}
-				if err := deploy.Stage(dataDir, templateVars, controlConfig.Skips); err != nil {
-					return err
-				}
-				if err := deploy.WatchFiles(ctx, dataDir); err != nil {
-					return err
-				}
-				return nil
-			},
-			func(ctx context.Context) error {
-				if !config.DisableServiceLB && config.Rootless {
-					return rootlessports.Register(ctx, config.TLSConfig.HTTPSPort)
-				}
-				return nil
-			},
-		},
-	}
-
-	if _, _, err = normanConfig.Build(ctx, nil); err != nil {
-=======
 	sc, err := newContext(ctx, controlConfig.Runtime.KubeConfigSystem)
 	if err != nil {
 		return "", err
 	}
 
 	if err := stageFiles(ctx, sc, controlConfig); err != nil {
->>>>>>> c0702b0492... Port to wrangler
 		return "", err
 	}
 
