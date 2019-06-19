@@ -1,7 +1,7 @@
 version: '3'
 services:
   node:
-    image: Yuwenfeng2019/K2S:v0.5.0
+    image: rancher/k2s:v0.6.0
     tmpfs:
     - /run
     - /var/run
