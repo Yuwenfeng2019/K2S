@@ -1,7 +1,11 @@
 version: '3'
 services:
   node:
+<<<<<<< HEAD
     image: rancher/k2s:v0.6.0
+=======
+    image: rancher/k3s:v0.6.1
+>>>>>>> ca4620b6c3... update to v0.6.1
     tmpfs:
     - /run
     - /var/run
