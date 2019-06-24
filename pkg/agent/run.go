@@ -12,7 +12,6 @@ import (
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/config"
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/containerd"
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/flannel"
-	"github.com/Yuwenfeng2019/K2S/pkg/agent/proxy"
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/syssetup"
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/tunnel"
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/cmds"
@@ -49,10 +48,6 @@ func run(ctx context.Context, cfg cmds.Agent) error {
 	}
 
 	if err := tunnel.Setup(nodeConfig); err != nil {
-		return err
-	}
-
-	if err := proxy.Run(nodeConfig); err != nil {
 		return err
 	}
 
