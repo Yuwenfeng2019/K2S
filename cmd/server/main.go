@@ -9,9 +9,11 @@ import (
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/agent"
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/cmds"
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/crictl"
+	"github.com/Yuwenfeng2019/K2S/pkg/cli/ctr"
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/kubectl"
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/server"
 	"github.com/Yuwenfeng2019/K2S/pkg/containerd"
+	ctr2 "github.com/Yuwenfeng2019/K2S/pkg/ctr"
 	kubectl2 "github.com/Yuwenfeng2019/K2S/pkg/kubectl"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -21,6 +23,7 @@ func init() {
 	reexec.Register("containerd", containerd.Main)
 	reexec.Register("kubectl", kubectl2.Main)
 	reexec.Register("crictl", crictl2.Main)
+	reexec.Register("ctr", ctr2.Main)
 }
 
 func main() {
@@ -37,6 +40,7 @@ func main() {
 		cmds.NewAgentCommand(agent.Run),
 		cmds.NewKubectlCommand(kubectl.Run),
 		cmds.NewCRICTL(crictl.Run),
+		cmds.NewCtrCommand(ctr.Run),
 	}
 
 	err := app.Run(os.Args)
