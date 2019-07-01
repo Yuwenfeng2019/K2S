@@ -43,11 +43,8 @@ cleanup() {
     for container in ${K2S_SERVER} ${K2S_AGENT}; do
         docker cp ${container}:/var/lib/yuwenfeng2019/k2s/agent/containerd/containerd.log ${OUTPUT}/${container}-containerd.log
         docker logs ${container} >${OUTPUT}/${container}.log 2>&1
-        docker rm -f ${container} 2>/dev/null
-        if [ ${exit_status} -ne 0 ]; then
-            cat ${OUTPUT}/${container}-containerd.log
-            cat ${OUTPUT}/${container}.log
-        fi
+        cat ${OUTPUT}/${container}-containerd.log
+        cat ${OUTPUT}/${container}.log
     done
     rm ${KUBECONFIG}
     exit ${exit_status}
