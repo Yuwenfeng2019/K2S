@@ -13,6 +13,7 @@ import (
 	"github.com/Yuwenfeng2019/K2S/pkg/agent"
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/cmds"
 	"github.com/Yuwenfeng2019/K2S/pkg/datadir"
+	"github.com/Yuwenfeng2019/K2S/pkg/netutil"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
@@ -54,6 +55,10 @@ func Run(ctx *cli.Context) error {
 
 	if cmds.AgentConfig.ServerURL == "" {
 		return fmt.Errorf("--server is required")
+	}
+
+	if cmds.AgentConfig.FlannelIface != "" && cmds.AgentConfig.NodeIP == "" {
+		cmds.AgentConfig.NodeIP = netutil.GetIPFromInterface(cmds.AgentConfig.FlannelIface)
 	}
 
 	logrus.Infof("Starting k2s agent %s", ctx.App.Version)
