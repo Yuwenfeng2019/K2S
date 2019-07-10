@@ -22,6 +22,9 @@ set -e
 #   - INSTALL_K2S_SKIP_DOWNLOAD
 #     If set to true will not download K2S hash or binary.
 #
+#   - INSTALL_K2S_SKIP_SYMLINK
+#     If set to true will not symlink kubectl or crictl to k2s.
+#
 #   - INSTALL_K2S_SKIP_START
 #     If set to true will not start k2s service.
 #
@@ -355,6 +358,7 @@ download_and_verify() {
 # --- add additional utility links ---
 create_symlinks() {
     [ "${INSTALL_K2S_BIN_DIR_READ_ONLY}" = "true" ] && return
+    [ "${INSTALL_K2S_SKIP_SYMLINK}" = "true" ] && return
     if [ ! -e ${BIN_DIR}/kubectl ]; then
         info "Creating ${BIN_DIR}/kubectl symlink to K2S"
         $SUDO ln -s K2S ${BIN_DIR}/kubectl
