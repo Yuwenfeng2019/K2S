@@ -33,6 +33,10 @@ cp -f ./bin/hyperkube dist/artifacts/hyperkube${BIN_SUFFIX}
 CMD_NAME=dist/artifacts/K2S${BIN_SUFFIX}
 
 go generate
-LDFLAGS="-X github.com/Yuwenfeng2019/K2S/pkg/version.Version=$VERSION -X github.com/Yuwenfeng2019/K2S/pkg/version.GitCommit=${COMMIT:0:8} -w -s"
+LDFLAGS="
+    -X github.com/Yuwenfeng2019/K2S/pkg/version.Version=$VERSION
+    -X github.com/Yuwenfeng2019/K2S/pkg/version.GitCommit=${COMMIT:0:8}
+    -w -s
+"
 STATIC="-extldflags '-static'"
 CGO_ENABLED=0 go build -ldflags "$LDFLAGS $STATIC" -o ${CMD_NAME} ./cmd/K2S/main.go
