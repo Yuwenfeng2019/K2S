@@ -192,7 +192,7 @@ setup_env() {
         SYSTEMD_DIR="/etc/systemd/system"
     fi
 
-    # --- use servive or environment location depending on systemd/openrc ---
+    # --- use service or environment location depending on systemd/openrc ---
     if [ "${HAS_SYSTEMD}" = "true" ]; then
         FILE_K2S_SERVICE=${SYSTEMD_DIR}/${SERVICE_K2S}
         FILE_K2S_ENV=${SYSTEMD_DIR}/${SERVICE_K2S}.env
