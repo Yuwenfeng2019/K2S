@@ -22,8 +22,9 @@ set -e
 #   - INSTALL_K2S_SKIP_DOWNLOAD
 #     If set to true will not download K2S hash or binary.
 #
-#   - INSTALL_K2S_SKIP_SYMLINK
-#     If set to true will not symlink kubectl or crictl to k2s.
+#   - INSTALL_K2S_SYMLINK
+#     If set to 'skip' will not create symlinks, 'force' will overwrite,
+#     default will symlink if command does not exist in path.
 #
 #   - INSTALL_K2S_SKIP_START
 #     If set to true will not start k2s service.
@@ -358,18 +359,22 @@ download_and_verify() {
 # --- add additional utility links ---
 create_symlinks() {
     [ "${INSTALL_K2S_BIN_DIR_READ_ONLY}" = "true" ] && return
-    [ "${INSTALL_K2S_SKIP_SYMLINK}" = "true" ] && return
-    if [ ! -e ${BIN_DIR}/kubectl ]; then
-        info "Creating ${BIN_DIR}/kubectl symlink to K2S"
-        $SUDO ln -s K2S ${BIN_DIR}/kubectl
-    fi
+    [ "${INSTALL_K2S_SYMLINK}" = "skip" ] && return
 
-    if [ ! -e ${BIN_DIR}/crictl ]; then
-        info "Creating ${BIN_DIR}/crictl symlink to K2S"
-        $SUDO ln -s K2S ${BIN_DIR}/crictl
-    fi
+    for cmd in kubectl crictl ctr; do
+        if [ ! -e ${BIN_DIR}/${cmd} ] || [ "${INSTALL_K2S_SYMLINK}" = "force" ]; then
+            which_cmd=$(which ${cmd} || true)
+            if [ -z "${which_cmd}" ] || [ "${INSTALL_K2S_SYMLINK}" = "force" ]; then
+                info "Creating ${BIN_DIR}/${cmd} symlink to k2s"
+                $SUDO ln -sf k2s ${BIN_DIR}/${cmd}
+            else
+                info "Skipping ${BIN_DIR}/${cmd} symlink to k2s, command exists in PATH at ${which_cmd}"
+            fi
+        else
+            info "Skipping ${BIN_DIR}/${cmd} symlink to k2s, already exists"
+        fi
+    done
 }
-
 
 # --- create killall script ---
 create_killall() {
@@ -460,12 +465,11 @@ if (ls ${SYSTEMD_DIR}/k2s*.service || ls /etc/init.d/k2s*) >/dev/null 2>&1; then
     exit
 fi
 
-if [ -L ${BIN_DIR}/kubectl ]; then
-    rm -f ${BIN_DIR}/kubectl
-fi
-if [ -L ${BIN_DIR}/crictl ]; then
-    rm -f ${BIN_DIR}/crictl
-fi
+for cmd in kubectl crictl ctr; do
+    if [ -L ${BIN_DIR}/\$cmd ]; then
+        rm -f ${BIN_DIR}/\$cmd
+    fi
+done
 
 rm -rf /etc/yuwenfeng2019/k2s
 rm -rf /var/lib/yuwenfeng2019/k2s
