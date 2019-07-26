@@ -8,13 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/rancher/k3s/pkg/netutil"
-
 	systemd "github.com/coreos/go-systemd/daemon"
 	"github.com/pkg/errors"
 	"github.com/Yuwenfeng2019/K2S/pkg/agent"
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/cmds"
 	"github.com/Yuwenfeng2019/K2S/pkg/datadir"
+	"github.com/Yuwenfeng2019/K2S/pkg/netutil"
 	"github.com/Yuwenfeng2019/K2S/pkg/rootless"
 	"github.com/Yuwenfeng2019/K2S/pkg/server"
 	"github.com/rancher/wrangler/pkg/signals"
@@ -82,14 +81,12 @@ func run(app *cli.Context, cfg *cmds.Server) error {
 	serverConfig.ControlConfig.ExtraControllerArgs = cfg.ExtraControllerArgs
 	serverConfig.ControlConfig.ExtraSchedulerAPIArgs = cfg.ExtraSchedulerArgs
 	serverConfig.ControlConfig.ClusterDomain = cfg.ClusterDomain
-	serverConfig.ControlConfig.StorageEndpoint = cfg.StorageEndpoint
-	serverConfig.ControlConfig.StorageBackend = cfg.StorageBackend
-	serverConfig.ControlConfig.StorageCAFile = cfg.StorageCAFile
-	serverConfig.ControlConfig.StorageCertFile = cfg.StorageCertFile
-	serverConfig.ControlConfig.StorageKeyFile = cfg.StorageKeyFile
+	serverConfig.ControlConfig.Storage.Endpoint = cfg.StorageEndpoint
+	serverConfig.ControlConfig.Storage.CAFile = cfg.StorageCAFile
+	serverConfig.ControlConfig.Storage.CertFile = cfg.StorageCertFile
+	serverConfig.ControlConfig.Storage.KeyFile = cfg.StorageKeyFile
 	serverConfig.ControlConfig.AdvertiseIP = cfg.AdvertiseIP
 	serverConfig.ControlConfig.AdvertisePort = cfg.AdvertisePort
-	serverConfig.ControlConfig.BootstrapType = cfg.BootstrapType
 
 	if cmds.AgentConfig.FlannelIface != "" && cmds.AgentConfig.NodeIP == "" {
 		cmds.AgentConfig.NodeIP = netutil.GetIPFromInterface(cmds.AgentConfig.FlannelIface)
@@ -125,10 +122,6 @@ func run(app *cli.Context, cfg *cmds.Server) error {
 		serverConfig.ControlConfig.ClusterDNS[3] = 10
 	} else {
 		serverConfig.ControlConfig.ClusterDNS = net2.ParseIP(cfg.ClusterDNS)
-	}
-
-	if serverConfig.ControlConfig.StorageBackend != "etcd3" {
-		serverConfig.ControlConfig.NoLeaderElect = true
 	}
 
 	for _, noDeploy := range app.StringSlice("no-deploy") {
