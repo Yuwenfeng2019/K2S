@@ -167,8 +167,6 @@ trap cleanup EXIT
 
 K2S_PORT=$(timeout --foreground 5s bash -c get-port)
 OUTPUT=$(pwd)/sonobuoy-output/${K2S_PORT}
-K3S_PORT=$(timeout --foreground 5s bash -c get-port)
-OUTPUT=$(pwd)/sonobuoy-output/${K2S_PORT}
 LOGS=$(pwd)/logs/$$
 E2E="${OUTPUT}/e2e"
 E2E_LOG="plugins/e2e/results/e2e.log"
