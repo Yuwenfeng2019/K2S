@@ -20,8 +20,6 @@ services:
     - /run
     - /var/run
     privileged: true
-    depends_on:
-    - server
     environment:
     - K2S_URL=https://server:6443
     - K2S_CLUSTER_SECRET=somethingtotallyrandom
