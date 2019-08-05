@@ -1,21 +1,21 @@
 version: '3'
 services:
   server:
-    image: Yuwenfeng2019/k2s:v0.7.0
+    image: Yuwenfeng2019/k2s:v0.8.0
     command: server --disable-agent
     environment:
     - K2S_CLUSTER_SECRET=somethingtotallyrandom
     - K2S_KUBECONFIG_OUTPUT=/output/kubeconfig.yaml
     - K2S_KUBECONFIG_MODE=666
     volumes:
-    - k2s-server:/var/lib/k2s
+    - k2s-server:/var/lib/yuwenfeng/k2s
     # This is just so that we get the kubeconfig file out
     - .:/output
     ports:
     - 6443:6443
 
   node:
-    image: Yuwenfeng2019/k2s:v0.7.0
+    image: Yuwenfeng2019/k2s:v0.8.0
     tmpfs:
     - /run
     - /var/run
@@ -23,7 +23,7 @@ services:
     environment:
     - K2S_URL=https://server:6443
     - K2S_CLUSTER_SECRET=somethingtotallyrandom
-    # Can also use K2S_TOKEN from /var/lib/k2s/server/node-token instead of K2S_CLUSTER_SECRET
+    # Can also use K2S_TOKEN from /var/lib/yuwenfeng/k2s/server/node-token instead of K2S_CLUSTER_SECRET
     #- K2S_TOKEN=K13849a67fc385fd3c0fa6133a8649d9e717b0258b3b09c87ffc33dae362c12d8c0::node:2e373dca319a0525745fd8b3d8120d9c
 
 volumes:
