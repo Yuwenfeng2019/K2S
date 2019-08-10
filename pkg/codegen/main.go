@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	bindata "github.com/jteeuwen/go-bindata"
+	bindata "github.com/go-bindata/go-bindata"
 	v1 "github.com/Yuwenfeng2019/K2S/pkg/apis/k2s.cattle.io/v1"
 	controllergen "github.com/rancher/wrangler/pkg/controller-gen"
 	"github.com/rancher/wrangler/pkg/controller-gen/args"
