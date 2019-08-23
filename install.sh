@@ -167,7 +167,7 @@ setup_env() {
 
     # --- use sudo if we are not already root ---
     SUDO=sudo
-    if [ `id -u` = 0 ]; then
+    if [ $(id -u) = 0 ]; then
         SUDO=
     fi
 
@@ -207,7 +207,7 @@ setup_env() {
     fi
 
     # --- get hash of config & exec for currently installed k2s ---
-    PRE_INSTALL_HASHES=`get_installed_hashes`
+    PRE_INSTALL_HASHES=$(get_installed_hashes)
 
     # --- if bin directory is read only skip download ---
     if [ "${INSTALL_K2S_BIN_DIR_READ_ONLY}" = "true" ]; then
@@ -232,7 +232,7 @@ verify_K2S_is_executable() {
 # --- set arch and suffix, fatal if architecture not supported ---
 setup_verify_arch() {
     if [ -z "$ARCH" ]; then
-        ARCH=`uname -m`
+        ARCH=$(uname -m)
     fi
     case $ARCH in
         arm64)
@@ -249,16 +249,16 @@ setup_verify_arch() {
 
 # --- fatal if no curl ---
 verify_curl() {
-    if [ -z `which curl || true` ]; then
+    if [ -z $(which curl || true) ]; then
         fatal "Can not find curl for downloading files"
     fi
 }
 
 # --- create tempory directory and cleanup when done ---
 setup_tmp() {
-    TMP_DIR=`mktemp -d -t K2S-install.XXXXXXXXXX`
-    TMP_HASH=${TMP_DIR}/K2S.hash
-    TMP_BIN=${TMP_DIR}/K2S.bin
+    TMP_DIR=$(mktemp -d -t k2s-install.XXXXXXXXXX)
+    TMP_HASH=${TMP_DIR}/k2s.hash
+    TMP_BIN=${TMP_DIR}/k2s.bin
     cleanup() {
         code=$?
         set +e
@@ -275,7 +275,7 @@ get_release_version() {
         VERSION_K2S="${INSTALL_K2S_VERSION}"
     else
         info "Finding latest release"
-        VERSION_K2S=`curl -w "%{url_effective}" -I -L -s -S ${GITHUB_URL}/latest -o /dev/null | sed -e 's|.*/||'`
+        VERSION_K2S=$(curl -w "%{url_effective}" -I -L -s -S ${GITHUB_URL}/latest -o /dev/null | sed -e 's|.*/||')
     fi
     info "Using ${VERSION_K2S} as release"
 }
@@ -285,13 +285,13 @@ download_hash() {
     HASH_URL=${GITHUB_URL}/download/${VERSION_K2S}/sha256sum-${ARCH}.txt
     info "Downloading hash ${HASH_URL}"
     curl -o ${TMP_HASH} -sfL ${HASH_URL} || fatal "Hash download failed"
-    HASH_EXPECTED=`grep " k2s${SUFFIX}$" ${TMP_HASH} | awk '{print $1}'`
+    HASH_EXPECTED=$(grep " k2s${SUFFIX}$" ${TMP_HASH} | awk '{print $1}')
 }
 
 # --- check hash against installed version ---
 installed_hash_matches() {
-    if [ -x ${BIN_DIR}/K2S ]; then
-        HASH_INSTALLED=`sha256sum ${BIN_DIR}/K2S | awk '{print $1}'`
+    if [ -x ${BIN_DIR}/k2s ]; then
+        HASH_INSTALLED=$(sha256sum ${BIN_DIR}/k2s | awk '{print $1}')
         if [ "${HASH_EXPECTED}" = "${HASH_INSTALLED}" ]; then
             return
         fi
@@ -309,7 +309,7 @@ download_binary() {
 # --- verify downloaded binary hash ---
 verify_binary() {
     info "Verifying binary download"
-    HASH_BIN=`sha256sum ${TMP_BIN} | awk '{print $1}'`
+    HASH_BIN=$(sha256sum ${TMP_BIN} | awk '{print $1}')
     if [ "${HASH_EXPECTED}" != "${HASH_BIN}" ]; then
         fatal "Download sha256 does not match ${HASH_EXPECTED}, got ${HASH_BIN}"
     fi
@@ -322,7 +322,7 @@ setup_binary() {
     $SUDO chown root:root ${TMP_BIN}
     $SUDO mv -f ${TMP_BIN} ${BIN_DIR}/K2S
     if command -v getenforce > /dev/null 2>&1; then
-        if [ "Disabled" != `getenforce` ]; then
+        if [ "Disabled" != $(getenforce) ]; then
             info "SeLinux is enabled, setting permissions"
             if ! $SUDO semanage fcontext -l | grep "${BIN_DIR}/k2s" > /dev/null 2>&1; then
                 $SUDO semanage fcontext -a -t bin_t "${BIN_DIR}/k2s"
@@ -383,7 +383,7 @@ create_killall() {
     $SUDO tee ${BIN_DIR}/${KILLALL_K2S_SH} >/dev/null << \EOF
 #!/bin/sh
 set -x
-[ `id -u` = 0 ] || exec sudo $0 $@
+[ $(id -u) = 0 ] || exec sudo $0 $@
 
 for bin in /var/lib/yuwenfeng2019/k2s/data/**/bin/; do
     [ -d $bin ] && export PATH=$bin:$PATH
@@ -411,7 +411,7 @@ killtree() {
 killtree $(lsof | sed -e 's/^[^0-9]*//g; s/  */\t/g' | grep -w 'k2s/data/[^/]*/bin/containerd-shim' | cut -f1 | sort -n -u)
 
 do_unmount() {
-    MOUNTS=`cat /proc/self/mounts | awk '{print $2}' | grep "^$1" | sort -r`
+    MOUNTS=$(cat /proc/self/mounts | awk '{print $2}' | grep "^$1" | sort -r)
     if [ -n "${MOUNTS}" ]; then
         umount ${MOUNTS}
     fi
@@ -439,7 +439,7 @@ create_uninstall() {
     $SUDO tee ${BIN_DIR}/${UNINSTALL_K2S_SH} >/dev/null << EOF
 #!/bin/sh
 set -x
-[ \`id -u\` = 0 ] || exec sudo \$0 \$@
+[ \$(id -u) = 0 ] || exec sudo \$0 \$@
 
 ${BIN_DIR}/${KILLALL_K2S_SH}
 
@@ -490,7 +490,7 @@ systemd_disable() {
 # --- capture current env and create file containing K2S_ variables ---
 create_env_file() {
     info "env: Creating environment file ${FILE_K2S_ENV}"
-    UMASK=`umask`
+    UMASK=$(umask)
     umask 0377
     env | grep '^K2S_' | $SUDO tee ${FILE_K2S_ENV} >/dev/null
     umask $UMASK
@@ -615,7 +615,7 @@ service_enable_and_start() {
 
     [ "${INSTALL_K2S_SKIP_START}" = "true" ] && return
 
-    POST_INSTALL_HASHES=`get_installed_hashes`
+    POST_INSTALL_HASHES=$(get_installed_hashes)
     if [ "${PRE_INSTALL_HASHES}" = "${POST_INSTALL_HASHES}" ]; then
         info "No change detected so skipping service start"
         return
