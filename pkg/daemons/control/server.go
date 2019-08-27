@@ -21,11 +21,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rancher/kine/pkg/client"
-	"github.com/rancher/kine/pkg/endpoint"
-
 	certutil "github.com/rancher/dynamiclistener/cert"
 	"github.com/Yuwenfeng2019/K2S/pkg/daemons/config"
+	"github.com/rancher/kine/pkg/client"
+	"github.com/rancher/kine/pkg/endpoint"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/kubernetes/cmd/kube-apiserver/app"
@@ -35,9 +34,6 @@ import (
 	"k8s.io/kubernetes/pkg/kubeapiserver/authorizer/modes"
 	"k8s.io/kubernetes/pkg/master"
 	"k8s.io/kubernetes/pkg/proxy/util"
-	_ "k8s.io/kubernetes/pkg/util/reflector/prometheus" // for reflector metric registration
-	_ "k8s.io/kubernetes/pkg/util/workqueue/prometheus" // for workqueue metric registration
-	_ "k8s.io/kubernetes/pkg/version/prometheus"        // for version metric registration
 )
 
 var (
@@ -480,7 +476,7 @@ func getSigningCertFactory(regen bool, altNames *certutil.AltNames, extKeyUsage 
 }
 
 func genClientCerts(config *config.Control, runtime *config.ControlRuntime) error {
-	regen, err := createSigningCertKey("k3s-client", runtime.ClientCA, runtime.ClientCAKey)
+	regen, err := createSigningCertKey("k2s-client", runtime.ClientCA, runtime.ClientCAKey)
 	if err != nil {
 		return err
 	}
@@ -555,7 +551,7 @@ func createServerSigningCertKey(config *config.Control, runtime *config.ControlR
 		}
 		return true, nil
 	}
-	return createSigningCertKey("k3s-server", runtime.ServerCA, runtime.ServerCAKey)
+	return createSigningCertKey("k2s-server", runtime.ServerCA, runtime.ServerCAKey)
 }
 
 func genServerCerts(config *config.Control, runtime *config.ControlRuntime) error {
@@ -587,7 +583,7 @@ func genServerCerts(config *config.Control, runtime *config.ControlRuntime) erro
 }
 
 func genRequestHeaderCerts(config *config.Control, runtime *config.ControlRuntime) error {
-	regen, err := createSigningCertKey("k3s-request-header", runtime.RequestHeaderCA, runtime.RequestHeaderCAKey)
+	regen, err := createSigningCertKey("k2s-request-header", runtime.RequestHeaderCA, runtime.RequestHeaderCAKey)
 	if err != nil {
 		return err
 	}
