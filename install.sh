@@ -67,6 +67,7 @@ set -e
 #     if not specified.
 
 GITHUB_URL=https://github.com/Yuwenfeng2019/K2S/releases
+DOWNLOADER=
 
 # --- helper functions for logs ---
 info()
@@ -247,11 +248,14 @@ setup_verify_arch() {
     esac
 }
 
-# --- fatal if no curl ---
-verify_curl() {
-    if [ -z $(which curl || true) ]; then
-        fatal "Can not find curl for downloading files"
-    fi
+# --- verify existence of network downloader executable ---
+verify_downloader() {
+    # Return failure if it doesn't exist or is no executable
+    [ -x "$(which $1)" ] || return 1
+
+    # Set verified executable as our downloader program and return success
+    DOWNLOADER=$1
+    return 0
 }
 
 # --- create tempory directory and cleanup when done ---
@@ -275,16 +279,46 @@ get_release_version() {
         VERSION_K2S="${INSTALL_K2S_VERSION}"
     else
         info "Finding latest release"
-        VERSION_K2S=$(curl -w "%{url_effective}" -I -L -s -S ${GITHUB_URL}/latest -o /dev/null | sed -e 's|.*/||')
+        case $DOWNLOADER in
+            curl)
+                VERSION_K2S=$(curl -w '%{url_effective}' -I -L -s -S ${GITHUB_URL}/latest -o /dev/null | sed -e 's|.*/||')
+                ;;
+            wget)
+                VERSION_K2S=$(wget -SqO /dev/null ${GITHUB_URL}/latest 2>&1 | grep Location | sed -e 's|.*/||')
+                ;;
+            *)
+                fatal "Incorrect downloader executable '$DOWNLOADER'"
+                ;;
+        esac
     fi
     info "Using ${VERSION_K2S} as release"
+}
+
+# --- download from github url ---
+download() {
+    [ $# -eq 2 ] || fatal 'download needs exactly 2 arguments'
+
+    case $DOWNLOADER in
+        curl)
+            curl -o $1 -sfL $2
+            ;;
+        wget)
+            wget -qO $1 $2
+            ;;
+        *)
+            fatal "Incorrect executable '$DOWNLOADER'"
+            ;;
+    esac
+
+    # Abort if download command failed
+    [ $? -eq 0 ] || fatal 'Download failed'
 }
 
 # --- download hash from github url ---
 download_hash() {
     HASH_URL=${GITHUB_URL}/download/${VERSION_K2S}/sha256sum-${ARCH}.txt
     info "Downloading hash ${HASH_URL}"
-    curl -o ${TMP_HASH} -sfL ${HASH_URL} || fatal "Hash download failed"
+    download ${TMP_HASH} ${HASH_URL}
     HASH_EXPECTED=$(grep " k2s${SUFFIX}$" ${TMP_HASH} | awk '{print $1}')
 }
 
@@ -303,7 +337,7 @@ installed_hash_matches() {
 download_binary() {
     BIN_URL=${GITHUB_URL}/download/${VERSION_K2S}/K2S${SUFFIX}
     info "Downloading binary ${BIN_URL}"
-    curl -o ${TMP_BIN} -sfL ${BIN_URL} || fatal "Binary download failed"
+    download ${TMP_BIN} ${BIN_URL}
 }
 
 # --- verify downloaded binary hash ---
@@ -345,7 +379,7 @@ download_and_verify() {
     fi
 
     setup_verify_arch
-    verify_curl
+    verify_downloader curl || verify_downloader wget || fatal 'Can not find curl or wget for downloading files'
     setup_tmp
     get_release_version
     download_hash
