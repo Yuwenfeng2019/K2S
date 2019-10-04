@@ -449,7 +449,11 @@ killtree() {
 killtree $(lsof | sed -e 's/^[^0-9]*//g; s/  */\t/g' | grep -w 'k2s/data/[^/]*/bin/containerd-shim' | cut -f1 | sort -n -u)
 
 do_unmount() {
-    MOUNTS=$(cat /proc/self/mounts | awk '{print $2}' | grep "^$1" | sort -r)
+    MOUNTS=
+    while read ignore mount ignore; do
+        MOUNTS="$mount\n$MOUNTS"
+    done </proc/self/mounts
+    MOUNTS=$(printf $MOUNTS | grep "^$1" | sort -r)
     if [ -n "${MOUNTS}" ]; then
         umount ${MOUNTS}
     fi
