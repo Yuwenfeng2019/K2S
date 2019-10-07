@@ -155,6 +155,28 @@ volumes:
   host:
     path: /var/run/docker.sock
 
+---
+kind: pipeline
+name: arm
+
+platform:
+  os: linux
+  arch: arm
+
+steps:
+- name: build
+  image: rancher/dapper:v0.4.2
+  commands:
+  - dapper -f Dockerfile.sonobuoy.dapper
+  volumes:
+  - name: docker
+    path: /var/run/docker.sock
+
+volumes:
+- name: docker
+  host:
+    path: /var/run/docker.sock
+
 
 ---
 kind: pipeline
