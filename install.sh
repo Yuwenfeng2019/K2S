@@ -72,11 +72,11 @@ DOWNLOADER=
 # --- helper functions for logs ---
 info()
 {
-    echo "[INFO] " "$@"
+    echo '[INFO] ' "$@"
 }
 fatal()
 {
-    echo "[ERROR] " "$@"
+    echo '[ERROR] ' "$@" >&2
     exit 1
 }
 
@@ -96,26 +96,26 @@ verify_system() {
 # --- add quotes to command arguments ---
 quote() {
     for arg in "$@"; do
-        printf "%s\n" "$arg" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"
+        printf '%s\n' "$arg" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"
     done
 }
 
 # --- add indentation and trailing slash to quoted args ---
 quote_indent() {
-    printf ' \\'"\n"
+    printf ' \\\n'
     for arg in "$@"; do
-        printf "\t%s "'\\'"\n" "$(quote "$arg")"
+        printf '\t%s \\\n' "$(quote "$arg")"
     done
 }
 
 # --- escape most punctuation characters, except quotes, forward slash, and space ---
 escape() {
-    printf "%s" "$@" | sed -e 's/\([][!#$%&()*;<=>?\_`{|}]\)/\\\1/g;'
+    printf '%s' "$@" | sed -e 's/\([][!#$%&()*;<=>?\_`{|}]\)/\\\1/g;'
 }
 
 # --- escape double quotes ---
 escape_dq() {
-    printf "%s" "$@" | sed -e 's/"/\\"/g'
+    printf '%s' "$@" | sed -e 's/"/\\"/g'
 }
 
 # --- define needed environment variables ---
@@ -135,7 +135,7 @@ setup_env() {
         ;;
         # --- command is provided ---
         (*)
-            CMD_K2S="$1"
+            CMD_K2S=$1
             shift
         ;;
     esac
@@ -153,9 +153,9 @@ setup_env() {
     fi
 
     # --- check for invalid characters in system name ---
-    valid_chars=$(printf "%s" "${SYSTEM_NAME}" | sed -e 's/[][!#$%&()*;<=>?\_`{|}/[:space:]]/^/g;' )
+    valid_chars=$(printf '%s' "${SYSTEM_NAME}" | sed -e 's/[][!#$%&()*;<=>?\_`{|}/[:space:]]/^/g;' )
     if [ "${SYSTEM_NAME}" != "${valid_chars}"  ]; then
-        invalid_chars=$(printf "%s" "${valid_chars}" | sed -e 's/[^^]/ /g')
+        invalid_chars=$(printf '%s' "${valid_chars}" | sed -e 's/[^^]/ /g')
         fatal "Invalid characters for system name:
             ${SYSTEM_NAME}
             ${invalid_chars}"
@@ -187,14 +187,14 @@ setup_env() {
     if [ -n "${INSTALL_K2S_BIN_DIR}" ]; then
         BIN_DIR="${INSTALL_K2S_BIN_DIR}"
     else
-        BIN_DIR="/usr/local/bin"
+        BIN_DIR=/usr/local/bin
     fi
 
     # --- use systemd directory if defined or create default ---
     if [ -n "${INSTALL_K2S_SYSTEMD_DIR}" ]; then
         SYSTEMD_DIR="${INSTALL_K2S_SYSTEMD_DIR}"
     else
-        SYSTEMD_DIR="/etc/systemd/system"
+        SYSTEMD_DIR=/etc/systemd/system
     fi
 
     # --- use service or environment location depending on systemd/openrc ---
@@ -202,9 +202,9 @@ setup_env() {
         FILE_K2S_SERVICE=${SYSTEMD_DIR}/${SERVICE_K2S}
         FILE_K2S_ENV=${SYSTEMD_DIR}/${SERVICE_K2S}.env
     elif [ "${HAS_OPENRC}" = "true" ]; then
-        $SUDO mkdir -p /etc/rancher/k2s
+        $SUDO mkdir -p /etc/Yuwenfeng2019/K2S
         FILE_K2S_SERVICE=/etc/init.d/${SYSTEM_NAME}
-        FILE_K2S_ENV=/etc/rancher/k2s/${SYSTEM_NAME}.env
+        FILE_K2S_ENV=/etc/Yuwenfeng2019/K2S/${SYSTEM_NAME}.env
     fi
 
     # --- get hash of config & exec for currently installed k2s ---
@@ -599,8 +599,8 @@ command="${BIN_DIR}/k2s"
 command_args="$(escape_dq "${CMD_K2S_EXEC}")
     >>${LOG_FILE} 2>&1"
 
-output_log="${LOG_FILE}"
-error_log="${LOG_FILE}"
+output_log=${LOG_FILE}
+error_log=${LOG_FILE}
 
 pidfile="/var/run/${SYSTEM_NAME}.pid"
 respawn_delay=5
@@ -623,8 +623,8 @@ EOF
 
 # --- write systemd or openrc service file ---
 create_service_file() {
-    [ "${HAS_SYSTEMD}" = "true" ] && create_systemd_service_file
-    [ "${HAS_OPENRC}" = "true" ] && create_openrc_service_file
+    [ "${HAS_SYSTEMD}" = true ] && create_systemd_service_file
+    [ "${HAS_OPENRC}" = true ] && create_openrc_service_file
     return 0
 }
 
@@ -658,19 +658,19 @@ openrc_start() {
 
 # --- startup systemd or openrc service ---
 service_enable_and_start() {
-    [ "${HAS_SYSTEMD}" = "true" ] && systemd_enable
-    [ "${HAS_OPENRC}" = "true" ] && openrc_enable
+    [ "${HAS_SYSTEMD}" = true ] && systemd_enable
+    [ "${HAS_OPENRC}" = true ] && openrc_enable
 
     [ "${INSTALL_K2S_SKIP_START}" = "true" ] && return
 
     POST_INSTALL_HASHES=$(get_installed_hashes)
     if [ "${PRE_INSTALL_HASHES}" = "${POST_INSTALL_HASHES}" ]; then
-        info "No change detected so skipping service start"
+        info 'No change detected so skipping service start'
         return
     fi
 
-    [ "${HAS_SYSTEMD}" = "true" ] && systemd_start
-    [ "${HAS_OPENRC}" = "true" ] && openrc_start
+    [ "${HAS_SYSTEMD}" = true ] && systemd_start
+    [ "${HAS_OPENRC}" = true ] && openrc_start
     return 0
 }
 
