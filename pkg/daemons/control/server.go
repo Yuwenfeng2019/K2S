@@ -829,7 +829,7 @@ func cloudControllerManager(cfg *config.Control, runtime *config.ControlRuntime)
 		"cluster-cidr":                 cfg.ClusterIPRange.String(),
 		"bind-address":                 localhostIP.String(),
 		"secure-port":                  "0",
-		"cloud-provider":               "k3s",
+		"cloud-provider":               "k2s",
 		"allow-untagged-cloud":         "true",
 		"node-status-update-frequency": "1m",
 	}
