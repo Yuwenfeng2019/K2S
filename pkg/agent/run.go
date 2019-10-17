@@ -13,6 +13,7 @@ import (
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/containerd"
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/flannel"
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/loadbalancer"
+	"github.com/Yuwenfeng2019/K2S/pkg/agent/netpol"
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/syssetup"
 	"github.com/Yuwenfeng2019/K2S/pkg/agent/tunnel"
 	"github.com/Yuwenfeng2019/K2S/pkg/cli/cmds"
@@ -71,6 +72,12 @@ func run(ctx context.Context, cfg cmds.Agent, lb *loadbalancer.LoadBalancer) err
 
 	if !nodeConfig.AgentConfig.DisableCCM {
 		if err := syncAddressesLabels(ctx, &nodeConfig.AgentConfig); err != nil {
+			return err
+		}
+	}
+
+	if !nodeConfig.AgentConfig.DisableNPC {
+		if err := netpol.Run(ctx, nodeConfig); err != nil {
 			return err
 		}
 	}
