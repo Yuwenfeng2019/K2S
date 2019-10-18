@@ -475,6 +475,7 @@ do_unmount() {
 
 do_unmount '/run/k2s'
 do_unmount '/var/lib/Yuwenfeng2019/K2S'
+do_unmount '/var/lib/kubelet/pods'
 do_unmount '/run/netns/cni-'
 
 # Delete network interface(s) that match 'master cni0'
@@ -529,8 +530,9 @@ for cmd in kubectl crictl ctr; do
     fi
 done
 
-rm -rf /etc/yuwenfeng2019/k2s
-rm -rf /var/lib/yuwenfeng2019/k2s
+rm -rf /etc/Yuwenfeng2019/K2S
+rm -rf /var/lib/Yuwenfeng2019/K2S
+rm -rf /var/lib/kubelet
 rm -f ${BIN_DIR}/k2s
 rm -f ${BIN_DIR}/${KILLALL_K2S_SH}
 EOF
