@@ -564,16 +564,14 @@ create_systemd_service_file() {
 [Unit]
 Description=Lightweight Kubernetes
 Documentation=https://k2s.io
-After=network-online.target
+Wants=network-online.target
+
+[Install]
+WantedBy=multi-user.target
 
 [Service]
 Type=${SYSTEMD_TYPE}
 EnvironmentFile=${FILE_K2S_ENV}
-ExecStartPre=-/sbin/modprobe br_netfilter
-ExecStartPre=-/sbin/modprobe overlay
-ExecStart=${BIN_DIR}/k2s \\
-    ${CMD_K2S_EXEC}
-
 KillMode=process
 Delegate=yes
 LimitNOFILE=infinity
@@ -583,9 +581,10 @@ TasksMax=infinity
 TimeoutStartSec=0
 Restart=always
 RestartSec=5s
-
-[Install]
-WantedBy=multi-user.target
+ExecStartPre=-/sbin/modprobe br_netfilter
+ExecStartPre=-/sbin/modprobe overlay
+ExecStart=${BIN_DIR}/k2s \\
+    ${CMD_K2S_EXEC}
 EOF
 }
 
