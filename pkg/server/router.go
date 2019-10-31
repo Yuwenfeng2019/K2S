@@ -49,6 +49,7 @@ func router(serverConfig *config.Control, tunnel http.Handler, ca []byte) http.H
 	serverAuthed := mux.NewRouter()
 	serverAuthed.Use(authMiddleware(serverConfig, "k2s:server"))
 	serverAuthed.NotFoundHandler = nodeAuthed
+	serverAuthed.Path("/db/info").Handler(nodeAuthed)
 	serverAuthed.Path("/v1-k2s/server-bootstrap").Handler(bootstrap.Handler(&serverConfig.Runtime.ControlRuntimeBootstrap))
 
 	staticDir := filepath.Join(serverConfig.DataDir, "static")
