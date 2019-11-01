@@ -198,7 +198,7 @@ K2S_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${K2S_SERVER
 echo "Started ${K2S_SERVER} @ ${K2S_IP}:${K2S_PORT}"
 
 timeout --foreground 1m bash -c wait-for-kubeconfig
-verify-valid-versions ${K3S_SERVER}
+verify-valid-versions ${K2S_SERVER}
 
 # ---
 
