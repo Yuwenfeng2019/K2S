@@ -51,7 +51,7 @@ func getAddresses(endpoint *v1.Endpoints) []string {
 }
 
 func Setup(ctx context.Context, config *config.Node, onChange func([]string)) error {
-	restConfig, err := clientcmd.BuildConfigFromFlags("", config.AgentConfig.KubeConfigK2sController)
+	restConfig, err := clientcmd.BuildConfigFromFlags("", config.AgentConfig.KubeConfigK3sController)
 	if err != nil {
 		return err
 	}

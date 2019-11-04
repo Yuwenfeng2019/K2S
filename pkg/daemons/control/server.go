@@ -17,7 +17,7 @@ import (
 	"strings"
 	"time"
 
-	// registering k3s cloud provider
+	// registering k2s cloud provider
 	_ "github.com/Yuwenfeng2019/K2S/pkg/cloudprovider"
 
 	certutil "github.com/rancher/dynamiclistener/cert"
@@ -298,8 +298,8 @@ func prepare(ctx context.Context, config *config.Control, runtime *config.Contro
 	runtime.ClientKubeAPIKey = path.Join(config.DataDir, "tls", "client-kube-apiserver.key")
 	runtime.ClientKubeProxyCert = path.Join(config.DataDir, "tls", "client-kube-proxy.crt")
 	runtime.ClientKubeProxyKey = path.Join(config.DataDir, "tls", "client-kube-proxy.key")
-	runtime.ClientK3sControllerCert = path.Join(config.DataDir, "tls", "client-k3s-controller.crt")
-	runtime.ClientK3sControllerKey = path.Join(config.DataDir, "tls", "client-k3s-controller.key")
+	runtime.ClientK2sControllerCert = path.Join(config.DataDir, "tls", "client-k2s-controller.crt")
+	runtime.ClientK2sControllerKey = path.Join(config.DataDir, "tls", "client-k2s-controller.key")
 
 	runtime.ServingKubeAPICert = path.Join(config.DataDir, "tls", "serving-kube-apiserver.crt")
 	runtime.ServingKubeAPIKey = path.Join(config.DataDir, "tls", "serving-kube-apiserver.key")
@@ -395,7 +395,7 @@ func migratePassword(p *passwd.Passwd) error {
 	server, _ := p.Pass("server")
 	node, _ := p.Pass("node")
 	if server == "" && node != "" {
-		return p.EnsureUser("server", "k3s:server", node)
+		return p.EnsureUser("server", "k2s:server", node)
 	}
 	return nil
 }
@@ -447,11 +447,11 @@ func genUsers(config *config.Control, runtime *config.ControlRuntime) error {
 		return err
 	}
 
-	if err := passwd.EnsureUser("node", "k3s:agent", nodePass); err != nil {
+	if err := passwd.EnsureUser("node", "k2s:agent", nodePass); err != nil {
 		return err
 	}
 
-	if err := passwd.EnsureUser("server", "k3s:server", serverPass); err != nil {
+	if err := passwd.EnsureUser("server", "k2s:server", serverPass); err != nil {
 		return err
 	}
 
@@ -533,7 +533,7 @@ func genClientCerts(config *config.Control, runtime *config.ControlRuntime) erro
 	if _, err = factory("system:kube-proxy", nil, runtime.ClientKubeProxyCert, runtime.ClientKubeProxyKey); err != nil {
 		return err
 	}
-	if _, err = factory("system:k3s-controller", nil, runtime.ClientK3sControllerCert, runtime.ClientK3sControllerKey); err != nil {
+	if _, err = factory("system:k2s-controller", nil, runtime.ClientK2sControllerCert, runtime.ClientK2sControllerKey); err != nil {
 		return err
 	}
 
