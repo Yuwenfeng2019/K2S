@@ -16,7 +16,8 @@ docker run \
     -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
     -v $(pwd)/bin:/usr/bin \
     -v /var/log \
-    -v /var/lib/rancher/K2S \
+    -v /var/lib/kubelet \
+    -v /var/lib/yuwenfeng/k2s \
     -v /var/lib/cni \
     -v /usr/lib/aarch64-linux-gnu/libsqlite3.so.0:/usr/lib/aarch64-linux-gnu/libsqlite3.so.0:ro \
     --privileged \

@@ -10,7 +10,8 @@ RUN cd image/bin && \
 FROM scratch
 COPY --from=base /image /
 RUN chmod 1777 /tmp
-VOLUME /var/lib/k2s
+VOLUME /var/lib/kubelet
+VOLUME /var/lib/yuwenfeng/k2s
 VOLUME /var/lib/cni
 VOLUME /var/log
 ENV PATH="$PATH:/bin/aux"
