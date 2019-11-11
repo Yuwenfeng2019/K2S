@@ -29,8 +29,7 @@ cp ./build/out/data.tar.gz ./build/data/${HASH}.tgz
 
 BIN_SUFFIX="-${ARCH}"
 
-cp -f ./bin/hyperkube dist/artifacts/hyperkube${BIN_SUFFIX}
-CMD_NAME=dist/artifacts/K2S${BIN_SUFFIX}
+CMD_NAME=dist/artifacts/k2s${BIN_SUFFIX}
 
 go generate
 LDFLAGS="
