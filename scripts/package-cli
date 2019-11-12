@@ -38,4 +38,7 @@ LDFLAGS="
     -w -s
 "
 STATIC="-extldflags '-static'"
-CGO_ENABLED=0 go build -ldflags "$LDFLAGS $STATIC" -o ${CMD_NAME} ./cmd/K2S/main.go
+if [ "$DQLITE" = "true" ]; then
+    DQLITE_TAGS="dqlite"
+fi
+CGO_ENABLED=0 go build -tags "$DQLITE_TAGS" -ldflags "$LDFLAGS $STATIC" -o ${CMD_NAME} ./cmd/k2s/main.go
