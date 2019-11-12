@@ -49,6 +49,7 @@ mkdir -p ${OUTPUT}
 docker run -d --name ${K2S_SERVER} --privileged \
     -p 127.0.0.1:${K2S_PORT}:${K2S_PORT} \
     -e K2S_CLUSTER_SECRET=${SECRET} \
+    -e K2S_DEBUG=true \
     ${K2S_IMAGE} server --no-deploy=traefik --https-listen-port=${K2S_PORT}
 
 K2S_IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${K2S_SERVER})
