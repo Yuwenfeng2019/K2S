@@ -163,6 +163,7 @@ func NewAgentCommand(action func(ctx *cli.Context) error) cli.Command {
 				Value:       "/var/lib/k2s",
 			},
 			NodeNameFlag,
+			WithNodeIDFlag,
 			NodeLabels,
 			NodeTaints,
 			DockerFlag,
