@@ -3,7 +3,7 @@ set -e
 
 EXITCODE=0
 
-# rancher/k3s modified from
+# yuwenfeng2019/k2s modified from
 # https://github.com/moby/moby/blob/c831882/contrib/check-config.sh
 
 # bits of this were adapted from lxc-checkconfig for moby
@@ -19,7 +19,6 @@ possibleConfigs="
 "
 binDir=$(dirname "$0")
 configFormat=gz
-isError=0
 
 if [ $# -gt 0 ]; then
   CONFIG="$1"
