@@ -19,6 +19,7 @@ possibleConfigs="
 "
 binDir=$(dirname "$0")
 configFormat=gz
+isError=0
 
 if [ $# -gt 0 ]; then
   CONFIG="$1"
