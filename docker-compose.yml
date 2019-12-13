@@ -1,3 +1,6 @@
+# to run define K2S_TOKEN, K2S_VERSION is optional, eg:
+#   K2S_TOKEN=${RANDOM}${RANDOM}${RANDOM} docker-compose up
+
 version: '3'
 services:
 
@@ -9,7 +12,7 @@ services:
     - /var/run
     privileged: true
     environment:
-    - K2S_TOKEN=${K2S_TOKEN:-somethingtotallyrandom}
+    - K2S_TOKEN=${K2S_TOKEN:?err}
     - K2S_KUBECONFIG_OUTPUT=/output/kubeconfig.yaml
     - K2S_KUBECONFIG_MODE=666
     volumes:
@@ -27,7 +30,7 @@ services:
     privileged: true
     environment:
     - K2S_URL=https://server:6443
-    - K2S_TOKEN=${K2S_TOKEN:-somethingtotallyrandom}
+    - K2S_TOKEN=${K2S_TOKEN:?err}
 
 volumes:
   k2s-server: {}
