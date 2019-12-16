@@ -20,6 +20,7 @@ import (
 	// registering k2s cloud provider
 	_ "github.com/Yuwenfeng2019/K2S/pkg/cloudprovider"
 
+	"github.com/pkg/errors"
 	certutil "github.com/rancher/dynamiclistener/cert"
 	"github.com/Yuwenfeng2019/K2S/pkg/clientaccess"
 	"github.com/Yuwenfeng2019/K2S/pkg/cluster"
@@ -81,7 +82,7 @@ func Server(ctx context.Context, cfg *config.Control) error {
 	cfg.Runtime = runtime
 
 	if err := prepare(ctx, cfg, runtime); err != nil {
-		return err
+		return errors.Wrap(err, "preparing server")
 	}
 
 	cfg.Runtime.Tunnel = setupTunnel()
