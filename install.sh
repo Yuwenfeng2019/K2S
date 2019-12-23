@@ -33,8 +33,12 @@ set -e
 #     Version of k2s to download from github. Will attempt to download the
 #     latest version if not specified.
 #
+#   - INSTALL_K2S_COMMIT
+#     Commit of k2s to download from temporary cloud storage.
+#     * (for developer & QA use)
+#
 #   - INSTALL_K2S_BIN_DIR
-#     Directory to install K2S binary, links, and uninstall script to, or use
+#     Directory to install k2s binary, links, and uninstall script to, or use
 #     /usr/local/bin as the default
 #
 #   - INSTALL_K2S_BIN_DIR_READ_ONLY
@@ -67,6 +71,7 @@ set -e
 #     if not specified.
 
 GITHUB_URL=https://github.com/Yuwenfeng2019/K2S/releases
+STORAGE_URL=https://storage.googleapis.com/k2s-ci-builds
 DOWNLOADER=
 
 # --- helper functions for logs ---
@@ -284,8 +289,10 @@ setup_tmp() {
 
 # --- use desired K2S version if defined or find latest ---
 get_release_version() {
-    if [ -n "${INSTALL_K2S_VERSION}" ]; then
-        VERSION_K2S="${INSTALL_K2S_VERSION}"
+    if [ -n "${INSTALL_K2S_COMMIT}" ]; then
+        VERSION_K2S="commit ${INSTALL_K2S_COMMIT}"
+    elif [ -n "${INSTALL_K2S_VERSION}" ]; then
+        VERSION_K2S=${INSTALL_K2S_VERSION}
     else
         info "Finding latest release"
         case $DOWNLOADER in
@@ -325,7 +332,11 @@ download() {
 
 # --- download hash from github url ---
 download_hash() {
-    HASH_URL=${GITHUB_URL}/download/${VERSION_K2S}/sha256sum-${ARCH}.txt
+    if [ -n "${INSTALL_K2S_COMMIT}" ]; then
+        HASH_URL=${STORAGE_URL}/k2s${SUFFIX}-${INSTALL_K2S_COMMIT}.sha256sum
+    else
+        HASH_URL=${GITHUB_URL}/download/${VERSION_K2S}/sha256sum-${ARCH}.txt
+    fi
     info "Downloading hash ${HASH_URL}"
     download ${TMP_HASH} ${HASH_URL}
     HASH_EXPECTED=$(grep " k2s${SUFFIX}$" ${TMP_HASH})
@@ -346,7 +357,11 @@ installed_hash_matches() {
 
 # --- download binary from github url ---
 download_binary() {
-    BIN_URL=${GITHUB_URL}/download/${VERSION_K2S}/K2S${SUFFIX}
+    if [ -n "${INSTALL_K2S_COMMIT}" ]; then
+        BIN_URL=${STORAGE_URL}/k2s${SUFFIX}-${INSTALL_K2S_COMMIT}
+    else
+        BIN_URL=${GITHUB_URL}/download/${VERSION_K2S}/k2s${SUFFIX}
+    fi
     info "Downloading binary ${BIN_URL}"
     download ${TMP_BIN} ${BIN_URL}
 }
