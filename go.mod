@@ -81,7 +81,6 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/rancher/dynamiclistener v0.2.0
 	github.com/rancher/helm-controller v0.4.1
-	github.com/rancher/k3s v1.0.1
 	github.com/rancher/kine v0.3.5
 	github.com/rancher/remotedialer v0.2.0
 	github.com/rancher/wrangler v0.4.0
