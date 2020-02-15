@@ -60,35 +60,18 @@ replace (
 )
 
 require (
-	github.com/NYTimes/gziphandler v1.1.1 // indirect
-	github.com/bhendo/go-powershell v0.0.0-20190719160123-219e7fb4e41e // indirect
-	github.com/bronze1man/goStrongswanVici v0.0.0-20190828090544-27d02f80ba40 // indirect
-	github.com/buger/jsonparser v0.0.0-20181115193947-bf1c66bbce23 // indirect
 	github.com/canonical/go-dqlite v1.3.0
-	github.com/containerd/cgroups v0.0.0-00010101000000-000000000000 // indirect
 	github.com/containerd/containerd v1.3.0-beta.2.0.20190828155532-0293cbd26c69
-	github.com/containerd/continuity v0.0.0-20190827140505-75bee3e2ccb6 // indirect
 	github.com/containerd/cri v0.0.0-00010101000000-000000000000
-	github.com/containerd/fifo v0.0.0-20190816180239-bda0ff6ed73c // indirect
-	github.com/containerd/go-cni v0.0.0-20190904155053-d20b7eebc7ee // indirect
-	github.com/containerd/go-runc v0.0.0-20190923131748-a2952bc25f51 // indirect
-	github.com/containerd/ttrpc v0.0.0-20190828172938-92c8520ef9f8 // indirect
-	github.com/containernetworking/plugins v0.8.2 // indirect
 	github.com/coreos/flannel v0.11.0
 	github.com/coreos/go-iptables v0.4.2
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f
 	github.com/docker/docker v1.4.2-0.20191205034852-d163fbba3c82
-	github.com/docker/go-metrics v0.0.1 // indirect
-	github.com/flosch/pongo2 v0.0.0-20190707114632-bbf5a6c351f4 // indirect
 	github.com/go-bindata/go-bindata v3.1.2+incompatible
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/gofrs/flock v0.7.1 // indirect
-	github.com/gogo/googleapis v1.3.0 // indirect
 	github.com/google/tcpproxy v0.0.0-20180808230851-dfa16c61dad2
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/websocket v1.4.1
-	github.com/juju/errors v0.0.0-20190806202954-0232dcc7464d // indirect
-	github.com/juju/testing v0.0.0-20190723135506-ce30eb24acd2 // indirect
 	github.com/kubernetes-sigs/cri-tools v0.0.0-00010101000000-000000000000
 	github.com/lib/pq v1.1.1
 	github.com/lxc/lxd v0.0.0-20191108214106-60ea15630455
@@ -96,9 +79,9 @@ require (
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/opencontainers/runc v1.0.0-rc9
 	github.com/pkg/errors v0.8.1
-	github.com/rakelkar/gonetsh v0.0.0-20190719023240-501daadcadf8 // indirect
 	github.com/rancher/dynamiclistener v0.2.0
 	github.com/rancher/helm-controller v0.4.1
+	github.com/rancher/k3s v1.0.1
 	github.com/rancher/kine v0.3.5
 	github.com/rancher/remotedialer v0.2.0
 	github.com/rancher/wrangler v0.4.0
@@ -106,15 +89,11 @@ require (
 	github.com/rootless-containers/rootlesskit v0.6.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/pflag v1.0.5
-	github.com/tchap/go-patricia v2.3.0+incompatible // indirect
-	github.com/theckman/go-flock v0.7.1 // indirect
 	github.com/urfave/cli v1.22.2
 	golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586
 	golang.org/x/net v0.0.0-20191204025024-5ee1b9f4859a
 	golang.org/x/sys v0.0.0-20191204072324-ce4227a45e2e
 	google.golang.org/grpc v1.25.1
-	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
-	gopkg.in/robfig/cron.v2 v2.0.0-20150107220207-be2e0b0deed5 // indirect
 	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/api v0.17.0
 	k8s.io/apimachinery v0.17.0
