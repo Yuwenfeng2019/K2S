@@ -60,6 +60,8 @@ replace (
 )
 
 require (
+	github.com/benmoss/go-powershell v0.0.0-20190925205200-09527df358ca // indirect
+	github.com/buger/jsonparser v0.0.0-20191204142016-1a29609e0929 // indirect
 	github.com/canonical/go-dqlite v1.3.0
 	github.com/containerd/containerd v1.3.0-beta.2.0.20190828155532-0293cbd26c69
 	github.com/containerd/cri v0.0.0-00010101000000-000000000000
@@ -72,6 +74,7 @@ require (
 	github.com/google/tcpproxy v0.0.0-20180808230851-dfa16c61dad2
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/websocket v1.4.1
+	github.com/juju/errors v0.0.0-20190930114154-d42613fe1ab9 // indirect
 	github.com/kubernetes-sigs/cri-tools v0.0.0-00010101000000-000000000000
 	github.com/lib/pq v1.1.1
 	github.com/lxc/lxd v0.0.0-20191108214106-60ea15630455
@@ -79,8 +82,10 @@ require (
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/opencontainers/runc v1.0.0-rc9
 	github.com/pkg/errors v0.8.1
+	github.com/rakelkar/gonetsh v0.0.0-20190930180311-e5c5ffe4bdf0 // indirect
 	github.com/rancher/dynamiclistener v0.2.0
 	github.com/rancher/helm-controller v0.4.1
+	github.com/rancher/k3s v1.0.1
 	github.com/rancher/kine v0.3.5
 	github.com/rancher/remotedialer v0.2.0
 	github.com/rancher/wrangler v0.4.0
