@@ -142,7 +142,7 @@ func writePasswords(passwdFile string, records [][]string) error {
 		}
 		defer out.Close()
 
-		if err := util.SetFileModeForFile(out, 0600); err != nil {
+		if err := out.Chmod(0600); err != nil {
 			return err
 		}
 
