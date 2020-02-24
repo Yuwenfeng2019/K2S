@@ -730,10 +730,10 @@ github.com/rakelkar/gonetsh v0.0.0-20190719023240-501daadcadf8 h1:83l9gPhYtgxODl
 github.com/rakelkar/gonetsh v0.0.0-20190719023240-501daadcadf8/go.mod h1:4XHkfaUj+URzGO9sohoAgt2V9Y8nIW7fugpu0E6gShk=
 github.com/rakelkar/gonetsh v0.0.0-20190930180311-e5c5ffe4bdf0 h1:iXE9kmlAqhusXxzkXictdNgWS7p4ZBnmv9SdyMgTf6E=
 github.com/rakelkar/gonetsh v0.0.0-20190930180311-e5c5ffe4bdf0/go.mod h1:4XHkfaUj+URzGO9sohoAgt2V9Y8nIW7fugpu0E6gShk=
-github.com/rancher/containerd v1.3.3-k3s1 h1:j8NGZdXKsZd2ne0XQg6OBfMJ/NkY/Qri6QhscGrJp2M=
-github.com/rancher/containerd v1.3.3-k3s1/go.mod h1:ZMfzmqce2Z+QSEqdHMfeJs1TZ/UeJ1aDrazjpQT4ehM=
-github.com/rancher/cri v1.3.0-k3s.3 h1:j/Sq2LMyg6gBn2MS1j5dEudpdL+UYVH7ubbewUCXkS0=
-github.com/rancher/cri v1.3.0-k3s.3/go.mod h1:Ht5T1dIKzm+4NExmb7wDVG6qR+j0xeXIjjhCv1d9geY=
+github.com/rancher/containerd v1.3.3-k3s2 h1:RZr+TqFt7+YsrSYkyytlhW4HmneWeFNM7IymNOoGW6A=
+github.com/rancher/containerd v1.3.3-k3s2/go.mod h1:ZMfzmqce2Z+QSEqdHMfeJs1TZ/UeJ1aDrazjpQT4ehM=
+github.com/rancher/cri v1.3.0-k3s.4 h1:BXER8109dxgNw4qq8HHOCJ+3sHO+9AA1cwZTOLlqoTo=
+github.com/rancher/cri v1.3.0-k3s.4/go.mod h1:Ht5T1dIKzm+4NExmb7wDVG6qR+j0xeXIjjhCv1d9geY=
 github.com/rancher/cri-tools v1.17.0-k3s1 h1:jfu97FowbraTDc7b6fxWtO+dq+DU2oW+ABBQSEFiRb0=
 github.com/rancher/cri-tools v1.17.0-k3s1/go.mod h1:bRTZttsvk+nCG8tSFs8D6UUx8CkMXR5TAsRLS0fXAqI=
 github.com/rancher/dynamiclistener v0.2.0 h1:KucYwJXVVGhZ/NndfMCeQoCafT/VN7kvqSGgmlX8Lxk=
