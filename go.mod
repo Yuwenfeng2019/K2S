@@ -90,7 +90,7 @@ require (
 	github.com/rancher/remotedialer v0.2.0
 	github.com/rancher/wrangler v0.4.0
 	github.com/rancher/wrangler-api v0.4.0
-	github.com/rootless-containers/rootlesskit v0.6.0
+	github.com/rootless-containers/rootlesskit v0.7.2
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/pflag v1.0.5
 	github.com/urfave/cli v1.22.2
