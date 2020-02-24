@@ -81,6 +81,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.13.0
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/opencontainers/runc v1.0.0-rc9
+	github.com/opencontainers/selinux v1.3.1-0.20190929122143-5215b1806f52
 	github.com/pkg/errors v0.8.1
 	github.com/rakelkar/gonetsh v0.0.0-20190930180311-e5c5ffe4bdf0 // indirect
 	github.com/rancher/dynamiclistener v0.2.0
