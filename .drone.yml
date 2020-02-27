@@ -322,4 +322,10 @@ volumes:
   - name: docker
     host:
       path: /var/run/docker.sock
+<<<<<<< HEAD
 >>>>>>> b2ac8aad22... Send dispatch event with drone
+=======
+      
+depends_on:
+- manifest
+>>>>>>> 0bb94286ed... Add depends on manifest to dispatch
