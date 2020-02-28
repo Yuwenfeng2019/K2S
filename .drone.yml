@@ -304,7 +304,7 @@ steps:
       PAT_USERNAME:
         from_secret: pat_username
       PAT_TOKEN:
-        from_secret: pat_token
+        from_secret: github_token
     commands:
       - dapper dispatch
     volumes:
