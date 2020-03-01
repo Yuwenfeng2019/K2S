@@ -5,9 +5,9 @@ K2S is base on K3S(https://github.com/rancher/k3s/) from Rancher, but there are 
 1. focus on ARM architecture for further optimization(may add RISC-V support in the future);
 2. better support for Micro Virtual Machine and novel Container Runtimes such like Firecraker & Kata Container;
 3. different networking and storage solutions:
-   3.1 integrates Network Service Mesh(https://github.com/networkservicemesh/) which allows for a separate
+   * integrates Network Service Mesh(https://github.com/networkservicemesh/) which allows for a separate
        (and performant when required) data path from the CNI
-   3.2 enhanced Sqlite3 and Dqlite implementation
+   * enhanced Sqlite3 and Dqlite implementation
 4. mainly target at Open Hardware Platforms like 96Boards/Raspberry Pi, Lattepanda, and so on for
    IoT/Edge/Microserver/DevOps/HCI/AI/Blockchain...
    In addition, it could also work well on our TuobaOS;
