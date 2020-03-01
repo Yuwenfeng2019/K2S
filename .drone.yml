@@ -269,7 +269,7 @@ steps:
   settings:
     dry_run: true
     dockerfile: Dockerfile.manifest
-    repo: "rancher/k3s-manifest"
+    repo: "Yuwenfeng2019/K2S/k2s-manifest"
     build_args_from_env:
     - DOCKER_USERNAME
     - DOCKER_PASSWORD
@@ -285,8 +285,6 @@ steps:
 
 depends_on:
 - arm64
-<<<<<<< HEAD
-=======
 - arm
 
 ---
@@ -304,7 +302,7 @@ steps:
       PAT_USERNAME:
         from_secret: pat_username
       PAT_TOKEN:
-        from_secret: github_token
+        from_secret: pat_token
     commands:
       - dapper dispatch
     volumes:
@@ -322,10 +320,3 @@ volumes:
   - name: docker
     host:
       path: /var/run/docker.sock
-<<<<<<< HEAD
->>>>>>> b2ac8aad22... Send dispatch event with drone
-=======
-      
-depends_on:
-- manifest
->>>>>>> 0bb94286ed... Add depends on manifest to dispatch
