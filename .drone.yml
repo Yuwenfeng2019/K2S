@@ -249,14 +249,13 @@ volumes:
   host:
     path: /var/run/docker.sock
 
-
 ---
 kind: pipeline
 name: manifest
 
 platform:
   os: linux
-  arch: arm64
+  arch: amd64
 
 steps:
 - name: manifest
@@ -269,7 +268,7 @@ steps:
   settings:
     dry_run: true
     dockerfile: Dockerfile.manifest
-    repo: "Yuwenfeng2019/K2S/k2s-manifest"
+    repo: "Yuwenfeng2019/k2s-manifest"
     build_args_from_env:
     - DOCKER_USERNAME
     - DOCKER_PASSWORD
@@ -284,6 +283,7 @@ steps:
     - tag
 
 depends_on:
+- amd64
 - arm64
 - arm
 
@@ -302,7 +302,7 @@ steps:
       PAT_USERNAME:
         from_secret: pat_username
       PAT_TOKEN:
-        from_secret: pat_token
+        from_secret: github_token
     commands:
       - dapper dispatch
     volumes:
@@ -320,3 +320,6 @@ volumes:
   - name: docker
     host:
       path: /var/run/docker.sock
+      
+depends_on:
+- manifest
