@@ -26,6 +26,9 @@ set -e
 #     If set to 'skip' will not create symlinks, 'force' will overwrite,
 #     default will symlink if command does not exist in path.
 #
+#   - INSTALL_K2S_SKIP_ENABLE
+#     If set to true will not enable or start k2s service.
+#
 #   - INSTALL_K2S_SKIP_START
 #     If set to true will not start k2s service.
 #
@@ -166,11 +169,6 @@ setup_env() {
             ${invalid_chars}"
     fi
 
-    # --- set related files from system name ---
-    SERVICE_K2S=${SYSTEM_NAME}.service
-    UNINSTALL_K2S_SH=${SYSTEM_NAME}-uninstall.sh
-    KILLALL_K2S_SH=k2s-killall.sh
-
     # --- use sudo if we are not already root ---
     SUDO=sudo
     if [ `id -u` -eq 0 ]; then
@@ -201,6 +199,11 @@ setup_env() {
     else
         SYSTEMD_DIR=/etc/systemd/system
     fi
+
+    # --- set related files from system name ---
+    SERVICE_K2S=${SYSTEM_NAME}.service
+    UNINSTALL_K2S_SH=${UNINSTALL_K2S_SH:-${BIN_DIR}/${SYSTEM_NAME}-uninstall.sh}
+    KILLALL_K2S_SH=${KILLALL_K2S_SH:-${BIN_DIR}/k2s-killall.sh}
 
     # --- use service or environment location depending on systemd/openrc ---
     if [ "${HAS_SYSTEMD}" = "true" ]; then
@@ -381,8 +384,9 @@ setup_binary() {
     chmod 755 ${TMP_BIN}
     info "Installing K2S to ${BIN_DIR}/K2S"
     $SUDO chown root:root ${TMP_BIN}
-    $SUDO mv -f ${TMP_BIN} ${BIN_DIR}/K2S
-    if command -v getenforce > /dev/null 2>&1; then
+    $SUDO mv -f ${TMP_BIN} ${BIN_DIR}/k2s
+
+    if command -v getenforce >/dev/null 2>&1; then
         if [ "Disabled" != $(getenforce) ]; then
 	    info 'SELinux is enabled, setting permissions'
 	    if ! $SUDO semanage fcontext -l | grep "${BIN_DIR}/k2s" > /dev/null 2>&1; then
@@ -424,9 +428,9 @@ create_symlinks() {
     [ "${INSTALL_K2S_SYMLINK}" = "skip" ] && return
 
     for cmd in kubectl crictl ctr; do
-        if [ ! -e ${BIN_DIR}/${cmd} ] || [ "${INSTALL_K2S_SYMLINK}" = "force" ]; then
-            which_cmd=$(which ${cmd} || true)
-            if [ -z "${which_cmd}" ] || [ "${INSTALL_K2S_SYMLINK}" = "force" ]; then
+        if [ ! -e ${BIN_DIR}/${cmd} ] || [ "${INSTALL_K2S_SYMLINK}" = force ]; then
+            which_cmd=$(which ${cmd} 2>/dev/null || true)
+            if [ -z "${which_cmd}" ] || [ "${INSTALL_K2S_SYMLINK}" = force ]; then
                 info "Creating ${BIN_DIR}/${cmd} symlink to k2s"
                 $SUDO ln -sf k2s ${BIN_DIR}/${cmd}
             else
@@ -440,14 +444,14 @@ create_symlinks() {
 
 # --- create killall script ---
 create_killall() {
-    [ "${INSTALL_K2S_BIN_DIR_READ_ONLY}" = "true" ] && return
-    info "Creating killall script ${BIN_DIR}/${KILLALL_K2S_SH}"
-    $SUDO tee ${BIN_DIR}/${KILLALL_K2S_SH} >/dev/null << \EOF
+    [ "${INSTALL_K2S_BIN_DIR_READ_ONLY}" = true ] && return
+    info "Creating killall script ${KILLALL_K2S_SH}"
+    $SUDO tee ${KILLALL_K2S_SH} >/dev/null << \EOF
 #!/bin/sh
 [ $(id -u) -eq 0 ] || exec sudo $0 $@
 
-for bin in /var/lib/yuwenfeng2019/k2s/data/**/bin/; do
-    [ -d $bin ] && export PATH=$bin:$PATH
+for bin in /var/lib/rancher/k2s/data/**/bin/; do
+    [ -d $bin ] && export PATH=$PATH:$bin:$bin/aux
 done
 
 set -x
@@ -485,7 +489,7 @@ killtree() {
 }
 
 getshims() {
-    lsof | sed -e 's/^[^0-9]*//g; s/  */\t/g' | grep -w 'k2s/data/[^/]*/bin/containerd-shim' | cut -f1 | sort -n -u
+    ps -e -o pid= -o args= | sed -e 's/^ *//; s/\s\s*/\t/;' | grep -w 'k2s/data/[^/]*/bin/containerd-shim' | cut -f1
 }
 
 killtree $({ set +x; } 2>/dev/null; getshims; set -x)
@@ -520,20 +524,20 @@ ip link delete flannel.1
 rm -rf /var/lib/cni/
 iptables-save | grep -v KUBE- | grep -v CNI- | iptables-restore
 EOF
-    $SUDO chmod 755 ${BIN_DIR}/${KILLALL_K2S_SH}
-    $SUDO chown root:root ${BIN_DIR}/${KILLALL_K2S_SH}
+    $SUDO chmod 755 ${KILLALL_K2S_SH}
+    $SUDO chown root:root ${KILLALL_K2S_SH}
 }
 
 # --- create uninstall script ---
 create_uninstall() {
-    [ "${INSTALL_K2S_BIN_DIR_READ_ONLY}" = "true" ] && return
-    info "Creating uninstall script ${BIN_DIR}/${UNINSTALL_K2S_SH}"
-    $SUDO tee ${BIN_DIR}/${UNINSTALL_K2S_SH} >/dev/null << EOF
+    [ "${INSTALL_K2S_BIN_DIR_READ_ONLY}" = true ] && return
+    info "Creating uninstall script ${UNINSTALL_K2S_SH}"
+    $SUDO tee ${UNINSTALL_K2S_SH} >/dev/null << EOF
 #!/bin/sh
 set -x
 [ \`id -u\` -eq 0 ] || exec sudo \$0 \$@
 
-${BIN_DIR}/${KILLALL_K2S_SH}
+${KILLALL_K2S_SH}
 
 if which systemctl; then
     systemctl disable ${SYSTEM_NAME}
@@ -548,7 +552,7 @@ rm -f ${FILE_K2S_SERVICE}
 rm -f ${FILE_K2S_ENV}
 
 remove_uninstall() {
-    rm -f ${BIN_DIR}/${UNINSTALL_K2S_SH}
+    rm -f ${UNINSTALL_K2S_SH}
 }
 trap remove_uninstall EXIT
 
@@ -567,10 +571,10 @@ rm -rf /etc/Yuwenfeng2019/K2S
 rm -rf /var/lib/Yuwenfeng2019/K2S
 rm -rf /var/lib/kubelet
 rm -f ${BIN_DIR}/k2s
-rm -f ${BIN_DIR}/${KILLALL_K2S_SH}
+rm -f ${KILLALL_K2S_SH}
 EOF
-    $SUDO chmod 755 ${BIN_DIR}/${UNINSTALL_K2S_SH}
-    $SUDO chown root:root ${BIN_DIR}/${UNINSTALL_K2S_SH}
+    $SUDO chmod 755 ${UNINSTALL_K2S_SH}
+    $SUDO chown root:root ${UNINSTALL_K2S_SH}
 }
 
 # --- disable current service if loaded --
@@ -704,6 +708,8 @@ openrc_start() {
 
 # --- startup systemd or openrc service ---
 service_enable_and_start() {
+    [ "${INSTALL_K2S_SKIP_ENABLE}" = true ] && return
+
     [ "${HAS_SYSTEMD}" = true ] && systemd_enable
     [ "${HAS_OPENRC}" = true ] && openrc_enable
 
